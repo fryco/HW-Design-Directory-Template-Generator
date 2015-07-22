@@ -31,20 +31,19 @@ def SaveTxtFile(string, fname="read_me.txt"):
 
 # ./        
 MakeDir(projectName)
-projectReadMe = """Design Files - place this directory on a server with regular backup.
-Release Files - place this directory on a server with regular backup. Once released, NEVER CHANGE THESE FILES and DO NOT WORK IN THIS DIRECTORY!
-Work - place this directory on your computer."""
-
 projectHistory = """10-OCT-2013
 Added errata read_me.txt file
 
 6-APR-2013
 Release directory updated."""
-
-SaveTxtFile(projectReadMe)
-SaveTxtFile(projectHistory, "update_history.txt")
+if not os.path.exists("update_history.txt"):
+    SaveTxtFile(projectHistory, "update_history.txt")
 # ./Project/
 os.chdir("."+slash+projectName)
+projectReadMe = """Design Files - place this directory on a server with regular backup.
+Release Files - place this directory on a server with regular backup. Once released, NEVER CHANGE THESE FILES and DO NOT WORK IN THIS DIRECTORY!
+Work - place this directory on your computer."""
+SaveTxtFile(projectReadMe)
 MakeDir("Design Files")
 # ./Project/Design Files
 os.chdir(os.getcwd()+slash+"Design Files")
@@ -6664,5 +6663,6 @@ IFIKL0lEIFs8RjA2RUJFQkU2ODJDN0E3MTVBNTA4ODBBMDcxOTg0MkY+PEYwNkVCRUJFNjgyQzdB
 NzE1QTUwODgwQTA3MTk4NDJGPl0KPj4Kc3RhcnR4cmVmCjM0ODE3OQolJUVPRgo=
 """
 
-with open("Directory_Template_Manual.pdf", "wb") as text_file:
-    text_file.write(pdfSource.decode('base64', 'strict'))
+if not os.path.exists("Directory_Template_Manual.pdf"):
+    with open("Directory_Template_Manual.pdf", "wb") as text_file:
+        text_file.write(pdfSource.decode('base64', 'strict'))
