@@ -10,3 +10,4 @@ For detailed directory tree description please check '*Directory_Template_Manual
 
 Additional features:
 * Simple, local control version mechanism provided by '*BackMeUp.py*' script. It creates zip archive with current timestamp.
+
