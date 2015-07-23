@@ -48,9 +48,14 @@ def MakeDir(dirName):
             print "###\n### BE CAREFUL! Directory %s already exists.\n###"     \
             % dirName
             
-def SaveTxtFile(string, fname="read_me.txt"):
-    with open(fname, "w") as text_file:
-        text_file.write(string)
+def SaveTxtFile(string, overwrite=False,fname="read_me.txt"):
+    if overwrite:
+        with open(fname, "w") as text_file:
+            text_file.write(string)
+    else:
+        if not os.path.exists(fname):
+            with open(fname, "w") as text_file:
+                text_file.write(string)
    
 # ./
 if projectNameAsRootDir:
@@ -185,7 +190,7 @@ print "Press any key to continue..."
 raw_input()
 
 """
-SaveTxtFile(backMeUpScript, "BackMeUp.py")
+SaveTxtFile(backMeUpScript, True, "BackMeUp.py")
 open("backupInfo.txt", 'a').close()
 
 MakeDir("Docs")
