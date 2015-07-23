@@ -55,19 +55,23 @@ def SaveTxtFile(string, fname="read_me.txt"):
 # ./
 if projectNameAsRootDir:
     MakeDir(projectName)
-projectHistory = """10-OCT-2013
+projectHistory = \
+"""10-OCT-2013
 Added errata read_me.txt file
 
 6-APR-2013
-Release directory updated."""
+Release directory updated.
+"""
 if not os.path.exists("update_history.txt"):
     SaveTxtFile(projectHistory, "update_history.txt")
 # ./Project/
 if projectNameAsRootDir:
     os.chdir("."+slash+projectName)
-projectReadMe = """Design Files - place this directory on a server with regular backup.
+projectReadMe = \
+"""Design Files - place this directory on a server with regular backup.
 Release Files - place this directory on a server with regular backup. Once released, NEVER CHANGE THESE FILES and DO NOT WORK IN THIS DIRECTORY!
-Work - place this directory on your computer."""
+Work - place this directory on your computer.
+"""
 SaveTxtFile(projectReadMe)
 MakeDir("Design Files")
 # ./Project/Design Files
@@ -78,19 +82,25 @@ os.chdir(os.getcwd()+slash+"!"+toolName+" Specific Files")
 MakeDir(toolName+" Integrated Library")
 # ./Project/Design Files/Tool Specyfic Files/Tool Integrated Library
 os.chdir(os.getcwd()+slash+toolName+" Integrated Library")
-integratedLibrary = """Place for """+toolName+""" Library files"""
+integratedLibrary = \
+"""Place for """+toolName+""" Library files
+"""
 SaveTxtFile(integratedLibrary)
 MakeDir("3D models")
 # ./Project/Design Files/Tool Specyfic Files/Tool Integrated Library/3D models
 os.chdir("."+slash+"3D models")
-model3D = """Place STEP files of 3D models here."""
+model3D = \
+"""Place STEP files of 3D models here.
+"""
 SaveTxtFile(model3D)
 # ./Project/Design Files/
 os.chdir('..'+slash+'..')
 MakeDir(toolName+" Templates")
 # ./Project/Design Files/Tool Specyfic Files/Tool Templates
 os.chdir("."+slash+toolName+" Templates")
-templates = """Place for """+toolName+""" templates, e.g for BOMs"""
+templates = \
+"""Place for """+toolName+""" templates, e.g for BOMs
+"""
 SaveTxtFile(templates)
 # ./Project/Design Files
 os.chdir('..'+slash+'..')
@@ -109,7 +119,8 @@ V2I1 - not compatible with V1
 
 This is also place for backups. Pack V1I1 Directory, add date and possibly a note:
 V1I1 2011 01 10
-V1I1 2011 02 21 Schematic Checked"""
+V1I1 2011 02 21 Schematic Checked
+"""
 SaveTxtFile(project)
 
 backMeUpScript = \
@@ -162,7 +173,8 @@ open("backupInfo.txt", 'a').close()
 MakeDir("Docs")
 # ./Project/Design Files/Client Name/Project Name/Docs
 os.chdir(os.getcwd()+slash+"Docs")
-docs = """Copy all created documents (doc, xls, pdf) directly here, or create new subfolders e.g. Manual, ...
+docs = \
+"""Copy all created documents (doc, xls, pdf) directly here, or create new subfolders e.g. Manual, ...
 """
 SaveTxtFile(docs)
 # ./Project/Design Files/Client Name/Project Name/
@@ -170,13 +182,17 @@ os.chdir('..')
 MakeDir("V1I1")
 # ./Project/Design Files/Client Name/Project Name/V1I1
 os.chdir(os.getcwd()+slash+"V1I1")
-vi = """Place here """+toolName+""" Design Files
-After release, keep record about any required changes in TODO directory."""
+vi = \
+"""Place here """+toolName+""" Design Files
+After release, keep record about any required changes in TODO directory.
+"""
 SaveTxtFile(vi)
 MakeDir("Firmware")
 # ./Project/Design Files/Client Name/Project Name/V1I1/Firmware
 os.chdir(os.getcwd()+slash+"Firmware")
-fw = """All the files needed for CPLD, EEPROMs, uController, BIOS, ..."""
+fw = \
+"""All the files needed for CPLD, EEPROMs, uController, BIOS, ...
+"""
 SaveTxtFile(fw)
 # ./Project/Design Files/Client Name/Project Name/V1I1
 os.chdir('..')
@@ -195,7 +211,8 @@ PCB:
 Production:
 
 
-Firmware:"""
+Firmware:
+"""
 SaveTxtFile(todo, "TODO.txt")
     
 # ./Project/Design Files/Client Name/Project Name/
@@ -227,7 +244,8 @@ releaseWrn = \
 - NEVER WORK IN THESE DIRECTOTRIES (do not open files directly from these folders)
 
 WHEN YOU START A NEW BOARD ISSUE, ALWAYS COPY AND USE FILES FROM THESE RELEASE DIRECTORIES AS STARTING POINT 
-AND THEN READ TODO file at!"""
+AND THEN READ TODO file at!
+"""
 SaveTxtFile(releaseWrn, "IMPORTANT READ ME.txt")
 MakeDir(clientName)
 # ./Project/Released Files/Client Name
@@ -235,7 +253,9 @@ os.chdir(os.getcwd()+slash+clientName)
 MakeDir(projectName)
 # ./Project/Released Files/Client Name/Project Name
 os.chdir(os.getcwd()+slash+projectName)
-infoo = """Use same naming for folders as in ! """+toolName+""" Source Files"""
+infoo = \
+"""Use same naming for folders as in ! """+toolName+""" Source Files
+"""
 SaveTxtFile(infoo)
 MakeDir("V1I1")
 # ./Project/Released Files/Client Name/Project Name/V1I1
@@ -243,7 +263,8 @@ os.chdir(os.getcwd()+slash+"V1I1")
 MakeDir("3D")
 # ./Project/Released Files/Client Name/Project Name/V1I1/3D
 os.chdir(os.getcwd()+slash+"3D")
-info3D = """Place following files here:
+info3D = \
+"""Place following files here:
 
 3D step file
 3D pdf
@@ -266,7 +287,6 @@ brdAss = \
 - Pick and Place
 - TOP and BOTTOM Layer + TOP and BOTTOM Paste Gerber Files (for stencil - if panel is done in a PCB house, ask them later for the top/bottom layers and paste for the panel)
 - PDF 3D Model
-
 
 """
 SaveTxtFile(brdAss)
@@ -368,15 +388,19 @@ os.chdir('..'+slash+'..')
 MakeDir("Source Files")
 # ./Project/Released Files/Client Name/Project Name/V1I1/Source Files
 os.chdir(os.getcwd()+slash+"Source Files")
-srcFile = "Place here zip file of source files, e.g copy and pack here directory from: ! "+toolName+"\\Source Files\\"+clientName+"\\"+projectName+"\\V1I1"
+srcFile = \
+"""Place here zip file of source files, e.g copy and pack here directory from: ! "+toolName+"\\Source Files\\"+clientName+"\\"+projectName+"\\V1I1
+"""
 SaveTxtFile(srcFile)
 # ./Project/Released Files/Client Name/Project Name/V1I1/
 os.chdir('..')
 MakeDir("Schematic")
 # ./Project/Released Files/Client Name/Project Name/V1I1/Schematic
 os.chdir(os.getcwd()+slash+"Schematic")
-schFile = """Update Schematic Cover Page to RELEASED DD-MMM-YYYY
-Place here PDF version of schematic, if possible one for each BOM variant."""
+schFile = \
+"""Update Schematic Cover Page to RELEASED DD-MMM-YYYY
+Place here PDF version of schematic, if possible one for each BOM variant.
+"""
 SaveTxtFile(schFile)
 # ./Project/Released Files/Client Name/Project Name/
 os.chdir('..'+slash+'..')
@@ -454,7 +478,8 @@ MakeDir("Competition and Similar Products")
 # ./Project/Work/Client Name/Project Name/V1I1/Competition and Similar Products
 os.chdir(os.getcwd()+slash+"Competition and Similar Products")
 competition = \
-"""Create a directory with Competition Company name and place all documents about their similar produtcs there."""
+"""Create a directory with Competition Company name and place all documents about their similar produtcs there.
+"""
 SaveTxtFile(competition)
 # ./Project/Work/Client Name/Project Name/V1I1/
 os.chdir('..')
@@ -466,7 +491,8 @@ ds = \
 
 For components with more then one datasheet, create a directory, e.g:
 Intel
-Ethernet."""
+Ethernet.
+"""
 SaveTxtFile(ds)
 # ./Project/Work/Client Name/Project Name/V1I1/
 os.chdir('..')
@@ -474,7 +500,8 @@ MakeDir("Design Guides")
 # ./Project/Work/Client Name/Project Name/V1I1/Design Guides
 os.chdir(os.getcwd()+slash+"Design Guides")
 guides = \
-"""Place all design guide, schematic / layout check documents, length & power calculators here."""
+"""Place all design guide, schematic / layout check documents, length & power calculators here.
+"""
 SaveTxtFile(guides)
 # ./Project/Work/Client Name/Project Name/V1I1/
 os.chdir('..')
@@ -482,7 +509,8 @@ MakeDir("Development Boards")
 # ./Project/Work/Client Name/Project Name/V1I1/Development Boards
 os.chdir(os.getcwd()+slash+"Development Boards")
 devBrd = \
-"""Create a directory with Board name and copy there all the files from manufacturer."""
+"""Create a directory with Board name and copy there all the files from manufacturer.
+"""
 SaveTxtFile(devBrd)
 # ./Project/Work/Client Name/Project Name/V1I1/
 os.chdir('..')
@@ -497,7 +525,8 @@ MakeDir("Software")
 # ./Project/Work/Client Name/Project Name/V1I1/Software
 os.chdir(os.getcwd()+slash+"Software")
 sw = \
-"""Place here all software related files: Apllications, Drivers, Tools, ..."""
+"""Place here all software related files: Apllications, Drivers, Tools, ...
+"""
 SaveTxtFile(sw)
 # ./Project/Work/Client Name/Project Name/
 os.chdir('..'+slash+'..')
