@@ -78,6 +78,6 @@ For detailed directory tree description please check `Directory_Template_Manual.
                     +---Errata
                     \---Software
 ```
-## Credits
+## References
 Folder structure comes from [welldone blog](http://www.fedevel.com/welldoneblog/2013/10/hardware-design-directory-template/)
 
