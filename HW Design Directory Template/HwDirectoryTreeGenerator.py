@@ -1,3 +1,4 @@
+__version__ = '1.3'
 import os
 import errno
 from sys import platform as _platform
@@ -98,16 +99,21 @@ V1I1 2011 01 10
 V1I1 2011 02 21 Schematic Checked"""
 SaveTxtFile(project)
 
-backMeUpScript = """import os
+backMeUpScript = \
+"""__version__ = '1.1'
+import os
 import zipfile
 import time
 import datetime
 
+## Put here correct revision number. It should be the same
+## as directory name
 revision = "V1I1"
 
 ## Put brief description about what have been done in
 ## this revision in backupInfo.txt and/or update TODO
-## info in dedicated directory.
+## info in dedicated directory. If file will be empty
+## you will be asked to fill it.
 backupInfoFile = "backupInfo.txt"
 
 if not os.path.exists(backupInfoFile):
@@ -118,9 +124,9 @@ with open(backupInfoFile, 'rb+') as f:
     
 if backupInfo:
     timestamp = time.time()
-    zfTimestamp  = \\
+    zfTimestamp  = \
     datetime.datetime.fromtimestamp(timestamp).strftime('%Y%m%d_%H%M%S')
-    bckTimestamp = \\
+    bckTimestamp = \
     datetime.datetime.fromtimestamp(timestamp).strftime('%H:%M:%S %d.%m.%Y')
     zfName = zfTimestamp+'_'+revision+'.zip'        
     zf = zipfile.ZipFile(zfName, "w")
@@ -129,14 +135,14 @@ if backupInfo:
         for filename in files:
             zf.write(os.path.join(dirname, filename))
     with open(backupInfoFile, "a") as f:
-        f.write("\\n\\nTimestamp: "+bckTimestamp)
+        f.write("\n\nTimestamp: "+bckTimestamp)
     zf.write(backupInfoFile)
     zf.close()
     open(backupInfoFile, 'w').close()
     print "Backup is done. Zip file:", zfName
 else:
-    print "Backup info is empty! \\
-    \\nPlease add description to backupInfo.txt and re-run this script again!"
+    print "Backup info is empty! \
+    \nPlease add description to backupInfo.txt and re-run this script again!"
 
 print "Press any key to continue..."
 raw_input()
