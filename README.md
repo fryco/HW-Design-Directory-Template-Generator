@@ -5,6 +5,7 @@ Misc tools/scripts for HW/SW design support.
 Directory template generator dedicated to control hardware design flow.
 
 **Usage:** 
+
 1. Open script `HwDirectoryTreeGenerator.py`
 
 2. Read comments.
