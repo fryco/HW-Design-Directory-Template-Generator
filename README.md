@@ -21,6 +21,7 @@ Directory tree looks like:
     |   |   \---_EDATool Templates
     |   \---_ClientName
     |       \---_ProjectName
+	|           +---Backup (optional)
     |           +---Docs
     |           +---V1I1
     |           |   +---Firmware
