@@ -39,13 +39,13 @@ projectNameAsRootDir = False
 def MakeDir(dirName):
     try:
         os.makedirs(dirName)
-        print "###\n### Directory %s has been created"                    \
+        print "###\n### Directory %s has been created" \
         % dirName
     except OSError as exception:
         if exception.errno != errno.EEXIST:
             raise
         else:
-            print "###\n### BE CAREFUL! Directory %s already exists.\n###"     \
+            print "###\n### BE CAREFUL! Directory %s already exists.\n###" \
             % dirName
             
 def SaveTxtFile(string, overwrite=False,fname="read_me.txt"):
@@ -60,15 +60,7 @@ def SaveTxtFile(string, overwrite=False,fname="read_me.txt"):
 # ./
 if projectNameAsRootDir:
     MakeDir(projectName)
-projectHistory = \
-"""10-OCT-2013
-Added errata read_me.txt file
 
-6-APR-2013
-Release directory updated.
-"""
-if not os.path.exists("update_history.txt"):
-    SaveTxtFile(projectHistory, "update_history.txt")
 # ./Project/
 if projectNameAsRootDir:
     os.chdir("."+slash+projectName)
@@ -6755,7 +6747,9 @@ NDU5OTggMDAwMDAgbiAKdHJhaWxlcgo8PCAvU2l6ZSAxMzMgL1Jvb3QgMSAwIFIgL0luZm8gMiAw
 IFIKL0lEIFs8RjA2RUJFQkU2ODJDN0E3MTVBNTA4ODBBMDcxOTg0MkY+PEYwNkVCRUJFNjgyQzdB
 NzE1QTUwODgwQTA3MTk4NDJGPl0KPj4Kc3RhcnR4cmVmCjM0ODE3OQolJUVPRgo=
 """
-print os.getcwd()
+if projectNameAsRootDir:
+    os.chdir("."+slash+projectName)
 if not os.path.exists("Directory_Template_Manual.pdf"):
     with open("Directory_Template_Manual.pdf", "wb") as text_file:
         text_file.write(pdfSource.decode('base64', 'strict'))
+
