@@ -2,6 +2,7 @@ import os
 import errno
 from sys import platform as _platform
 
+# Backslash alignment between different OSes
 if _platform == "linux" or _platform == "linux2":
    # Linux
     slash = '/'
@@ -9,8 +10,19 @@ elif _platform == "win32":
    # Windows
     slash = '\\'
 
+# Project client name.
 clientName  = 'Exploding Capacitors Lab'
-projectName = '_ProjectName'
+
+# If 'projectName' will be empty, script will fetch current directory
+# name and uses it as project name.
+projectName = ''
+
+if not projectName:
+    projectName = os.path.relpath(".","..")
+    
+# Most work will be done with KiCAD EDA so it will be default value of
+# 'toolName'. If you are using different software, please put its name
+# here.
 toolName    = 'KiCAD'
 
 def MakeDir(dirName):
@@ -28,7 +40,7 @@ def MakeDir(dirName):
 def SaveTxtFile(string, fname="read_me.txt"):
     with open(fname, "w") as text_file:
         text_file.write(string)
-
+   
 # ./        
 MakeDir(projectName)
 projectHistory = """10-OCT-2013
