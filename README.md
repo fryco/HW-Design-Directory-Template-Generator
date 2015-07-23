@@ -11,3 +11,62 @@ For detailed directory tree description please check `Directory_Template_Manual.
 Additional features:
 * Simple, local control version mechanism provided by `BackMeUp.py` script. It creates zip archive with current timestamp.
 
+Directory tree look like:
+'
+\---_ProjectName
+    +---Design Files
+    |   +---!_EDATool Specific Files
+    |   |   +---_EDATool Integrated Library
+    |   |   |   \---3D models
+    |   |   \---_EDATool Templates
+    |   \---_ClientName
+    |       \---_ProjectName
+    |           +---Docs
+    |           +---V1I1
+    |           |   +---Firmware
+    |           |   \---TODO
+    |           \---VxIx
+    |               +---Firmware
+    |               \---TODO
+    +---Released Files
+    |   \---_ClientName
+    |       \---_ProjectName
+    |           +---V1I1
+    |           |   +---3D
+    |           |   +---Board Assembly
+    |           |   +---Firmware
+    |           |   +---PCB Manufacturing
+    |           |   |   +---Gerber Output
+    |           |   |   +---Layers with Highlighted Differential Pairs
+    |           |   |   \---NC Drill Output
+    |           |   +---Schematic
+    |           |   \---Source Files
+    |           \---VxIx
+    |               +---3D
+    |               +---Board Assembly
+    |               +---Firmware
+    |               +---PCB Manufacturing
+    |               |   +---Gerber Output
+    |               |   +---Layers with Highlighted Differential Pairs
+    |               |   \---NC Drill Output
+    |               +---Schematic
+    |               \---Source Files
+    \---Work
+        \---_ClientName
+            \---_ProjectName
+                +---V1I1
+                |   +---Competition and Similar Products
+                |   +---Datasheets
+                |   +---Design Guides
+                |   +---Development Boards
+                |   +---Errata
+                |   \---Software
+                \---VxIx
+                    +---Competition and Similar Products
+                    +---Datasheets
+                    +---Design Guides
+                    +---Development Boards
+                    +---Errata
+                    \---Software
+'
+
