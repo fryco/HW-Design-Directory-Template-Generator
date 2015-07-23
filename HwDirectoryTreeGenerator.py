@@ -12,11 +12,11 @@ elif _platform == "win32":
     slash = '\\'
 
 # Project client name.
-clientName = 'Exploding Capacitors Lab'
+clientName = '_ClientName'
 
 # If 'projectName' will be empty, script will fetch current directory
 # name and uses it as project name.
-projectName = ''
+projectName = '_ProjectName'
 
 if not projectName:
     projectName = os.path.relpath(".","..")
@@ -24,7 +24,7 @@ if not projectName:
 # Most work will be done with KiCAD EDA so it will be default value of
 # 'toolName'. If you are using different software, please put its name
 # here.
-toolName = 'KiCAD'
+toolName = '_ToolName'
 
 # If you want to create root directory named as projectName you have
 # to set this flag to True. It depends on user needs:
