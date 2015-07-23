@@ -12,7 +12,7 @@ Additional features:
 * Simple, local control version mechanism provided by `BackMeUp.py` script. It creates zip archive with current timestamp.
 
 Directory tree look like:
-'
+`
 \---_ProjectName
     +---Design Files
     |   +---!_EDATool Specific Files
@@ -68,5 +68,5 @@ Directory tree look like:
                     +---Development Boards
                     +---Errata
                     \---Software
-'
+`
 
