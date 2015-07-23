@@ -11,7 +11,7 @@ For detailed directory tree description please check `Directory_Template_Manual.
 Additional features:
 * Simple, local control version mechanism provided by `BackMeUp.py` script. It creates zip archive with current timestamp.
 
-Directory tree look like:
+Directory tree looks like:
 ```
 \---_ProjectName
     +---Design Files
@@ -69,4 +69,5 @@ Directory tree look like:
                     +---Errata
                     \---Software
 ```
+Folder structure was found here: [welldone blog](http://www.fedevel.com/welldoneblog/2013/10/hardware-design-directory-template/)
 
