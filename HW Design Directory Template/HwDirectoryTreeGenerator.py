@@ -1,4 +1,4 @@
-__version__ = '1.3'
+__version__ = '1.4'
 import os
 import errno
 from sys import platform as _platform
@@ -12,7 +12,7 @@ elif _platform == "win32":
     slash = '\\'
 
 # Project client name.
-clientName  = 'Exploding Capacitors Lab'
+clientName = 'Exploding Capacitors Lab'
 
 # If 'projectName' will be empty, script will fetch current directory
 # name and uses it as project name.
@@ -24,7 +24,17 @@ if not projectName:
 # Most work will be done with KiCAD EDA so it will be default value of
 # 'toolName'. If you are using different software, please put its name
 # here.
-toolName    = 'KiCAD'
+toolName = 'KiCAD'
+
+# If you want to create root directory named as projectName you have
+# to set this flag to True. It depends on user needs:
+#    - if user is using Git or SVN it is better to use False. After
+#      creating repository user should copy script into repo dir and run it.
+#    - if user is not using any control version system it is better to put
+#      script in dedicated directory with all HW projects, set flag to True
+#      and perform manual setup before script will be run. In this case
+#      user can do manual version control and backup with BackMeUp.py script.
+projectNameAsRootDir = False
 
 def MakeDir(dirName):
     try:
@@ -42,8 +52,9 @@ def SaveTxtFile(string, fname="read_me.txt"):
     with open(fname, "w") as text_file:
         text_file.write(string)
    
-# ./        
-MakeDir(projectName)
+# ./
+if projectNameAsRootDir:
+    MakeDir(projectName)
 projectHistory = """10-OCT-2013
 Added errata read_me.txt file
 
@@ -52,7 +63,8 @@ Release directory updated."""
 if not os.path.exists("update_history.txt"):
     SaveTxtFile(projectHistory, "update_history.txt")
 # ./Project/
-os.chdir("."+slash+projectName)
+if projectNameAsRootDir:
+    os.chdir("."+slash+projectName)
 projectReadMe = """Design Files - place this directory on a server with regular backup.
 Release Files - place this directory on a server with regular backup. Once released, NEVER CHANGE THESE FILES and DO NOT WORK IN THIS DIRECTORY!
 Work - place this directory on your computer."""
@@ -88,7 +100,8 @@ os.chdir(os.getcwd()+slash+clientName)
 MakeDir(projectName)
 # ./Project/Design Files/Client Name/Project Name
 os.chdir(os.getcwd()+slash+projectName)
-project = """Examples of other directory names:
+project = \
+"""Examples of other directory names:
 V1I1A - only BOM changes
 V1I2 - pin compatible with V1I1, no big changes
 V2I1 - not compatible with V1
@@ -100,20 +113,16 @@ V1I1 2011 02 21 Schematic Checked"""
 SaveTxtFile(project)
 
 backMeUpScript = \
-"""__version__ = '1.1'
-import os
+"""import os
 import zipfile
 import time
 import datetime
 
-## Put here correct revision number. It should be the same
-## as directory name
 revision = "V1I1"
 
 ## Put brief description about what have been done in
 ## this revision in backupInfo.txt and/or update TODO
-## info in dedicated directory. If file will be empty
-## you will be asked to fill it.
+## info in dedicated directory.
 backupInfoFile = "backupInfo.txt"
 
 if not os.path.exists(backupInfoFile):
@@ -124,9 +133,9 @@ with open(backupInfoFile, 'rb+') as f:
     
 if backupInfo:
     timestamp = time.time()
-    zfTimestamp  = \
+    zfTimestamp  = \\
     datetime.datetime.fromtimestamp(timestamp).strftime('%Y%m%d_%H%M%S')
-    bckTimestamp = \
+    bckTimestamp = \\
     datetime.datetime.fromtimestamp(timestamp).strftime('%H:%M:%S %d.%m.%Y')
     zfName = zfTimestamp+'_'+revision+'.zip'        
     zf = zipfile.ZipFile(zfName, "w")
@@ -135,14 +144,14 @@ if backupInfo:
         for filename in files:
             zf.write(os.path.join(dirname, filename))
     with open(backupInfoFile, "a") as f:
-        f.write("\n\nTimestamp: "+bckTimestamp)
+        f.write("\\n\\nTimestamp: "+bckTimestamp)
     zf.write(backupInfoFile)
     zf.close()
     open(backupInfoFile, 'w').close()
     print "Backup is done. Zip file:", zfName
 else:
-    print "Backup info is empty! \
-    \nPlease add description to backupInfo.txt and re-run this script again!"
+    print "Backup info is empty! \\
+    \\nPlease add description to backupInfo.txt and re-run this script again!"
 
 print "Press any key to continue..."
 raw_input()
@@ -174,7 +183,8 @@ os.chdir('..')
 MakeDir("TODO")
 # ./Project/Design Files/Client Name/Project Name/V1I1/TODO
 os.chdir(os.getcwd()+slash+"TODO")
-todo = """Here describe all the things which have to be improved or done in the next revision.
+todo = \
+"""Here describe all the things which have to be improved or done in the next revision.
 
 Schematic:
 
@@ -211,7 +221,8 @@ os.chdir('..'+slash+'..'+slash+'..'+slash+'..'+slash+'..')
 MakeDir("Released Files")
 # ./Project/Released Files
 os.chdir(os.getcwd()+slash+"Released Files")
-releaseWrn = """ONCE RELEASED: 
+releaseWrn = \
+"""ONCE RELEASED: 
 - NEVER EVER CHAGE THE FILES IN THESE DIRECTORIES!
 - NEVER WORK IN THESE DIRECTOTRIES (do not open files directly from these folders)
 
@@ -243,7 +254,8 @@ os.chdir('..')
 MakeDir("Board Assembly")
 # ./Project/Released Files/Client Name/Project Name/V1I1/Board Assembly
 os.chdir(os.getcwd()+slash+"Board Assembly")
-brdAss = """Place following files here:
+brdAss = \
+"""Place following files here:
 
 - Mechanical Drawing (Board dimensions, holes position, ..)
 - TOP and BOTTOM Assembly Drawing (Component position with Reference Designator)
@@ -260,7 +272,8 @@ brdAss = """Place following files here:
 SaveTxtFile(brdAss)
 # ./Project/Released Files/Client Name/Project Name/V1I1/
 os.chdir('..')
-vInfo = """Follow this procedure before releasing files. Confirm every action with your initials and date.
+vInfo = \
+"""Follow this procedure before releasing files. Confirm every action with your initials and date.
 IF ANY CHANGES NEEDS TO BE DONE, START THE PROCEDURE FROM BEGINNING!
 
 The procedure needs to be executed in order as defined here. Start from number 1
@@ -306,7 +319,8 @@ SaveTxtFile(todo, "!!! IMPORTANT !!! Release Document for "+toolName+".txt")
 MakeDir("Firmware")
 # ./Project/Released Files/Client Name/Project Name/V1I1/Firmware
 os.chdir(os.getcwd()+slash+"Firmware")
-frm = """All the files needed for CPLD, EEPROMs, uController, BIOS, ...
+frm = \
+"""All the files needed for CPLD, EEPROMs, uController, BIOS, ...
 
 Start file name with component designator - the one where the file needs to be stored e.g:
 U5 - AMI BIOS 0ABVQ018
@@ -337,7 +351,8 @@ os.chdir('..')
 MakeDir("Layers with Highlighted Differential Pairs")
 # ./Project/Released Files/Client Name/Project Name/V1I1/PCB Manufacturing/Layers with Highlighted Differential Pairs
 os.chdir(os.getcwd()+slash+"Layers with Highlighted Differential Pairs")
-diffPair = """Highlight differential pairs and Take screenshots of each layer. Examples of naming screenshots:
+diffPair = \
+"""Highlight differential pairs and Take screenshots of each layer. Examples of naming screenshots:
 
 DIFF100-L1.jpg
 DIFF100-L3.jpg
@@ -438,14 +453,16 @@ os.chdir(os.getcwd()+slash+"V1I1")
 MakeDir("Competition and Similar Products")
 # ./Project/Work/Client Name/Project Name/V1I1/Competition and Similar Products
 os.chdir(os.getcwd()+slash+"Competition and Similar Products")
-competition = """Create a directory with Competition Company name and place all documents about their similar produtcs there."""
+competition = \
+"""Create a directory with Competition Company name and place all documents about their similar produtcs there."""
 SaveTxtFile(competition)
 # ./Project/Work/Client Name/Project Name/V1I1/
 os.chdir('..')
 MakeDir("Datasheets")
 # ./Project/Work/Client Name/Project Name/V1I1/Datasheets
 os.chdir(os.getcwd()+slash+"Datasheets")
-ds = """For components with one datasheet only, these can be place directly here.
+ds = \
+"""For components with one datasheet only, these can be place directly here.
 
 For components with more then one datasheet, create a directory, e.g:
 Intel
@@ -456,14 +473,16 @@ os.chdir('..')
 MakeDir("Design Guides")
 # ./Project/Work/Client Name/Project Name/V1I1/Design Guides
 os.chdir(os.getcwd()+slash+"Design Guides")
-guides = """Place all design guide, schematic / layout check documents, length & power calculators here."""
+guides = \
+"""Place all design guide, schematic / layout check documents, length & power calculators here."""
 SaveTxtFile(guides)
 # ./Project/Work/Client Name/Project Name/V1I1/
 os.chdir('..')
 MakeDir("Development Boards")
 # ./Project/Work/Client Name/Project Name/V1I1/Development Boards
 os.chdir(os.getcwd()+slash+"Development Boards")
-devBrd = """Create a directory with Board name and copy there all the files from manufacturer."""
+devBrd = \
+"""Create a directory with Board name and copy there all the files from manufacturer."""
 SaveTxtFile(devBrd)
 # ./Project/Work/Client Name/Project Name/V1I1/
 os.chdir('..')
@@ -477,7 +496,8 @@ os.chdir('..')
 MakeDir("Software")
 # ./Project/Work/Client Name/Project Name/V1I1/Software
 os.chdir(os.getcwd()+slash+"Software")
-sw = """Place here all software related files: Apllications, Drivers, Tools, ..."""
+sw = \
+"""Place here all software related files: Apllications, Drivers, Tools, ..."""
 SaveTxtFile(sw)
 # ./Project/Work/Client Name/Project Name/
 os.chdir('..'+slash+'..')
@@ -519,7 +539,10 @@ MakeDir("Software")
 os.chdir(os.getcwd()+slash+"Software")
 SaveTxtFile(sw)
 # ./Project/Work/Client Name/Project Name/
-os.chdir('..'+slash+'..'+slash+'..'+slash+'..'+slash+'..'+slash+'..')
+if projectNameAsRootDir:
+    os.chdir('..'+slash+'..'+slash+'..'+slash+'..'+slash+'..'+slash+'..')
+else:
+    os.chdir('..'+slash+'..'+slash+'..'+slash+'..'+slash+'..')
 
 pdfSource = """JVBERi0xLjQKJcfsj6IKNSAwIG9iago8PC9MZW5ndGggNiAwIFIvRmlsdGVyIC9GbGF0ZURlY29k
 ZT4+CnN0cmVhbQp4nLVdW69lR3EWBIxzgvCMAYOdBDa5cYbkbPp+eY2SlygvIEt5gDw5MSgaE5n/
@@ -6680,7 +6703,7 @@ NDU5OTggMDAwMDAgbiAKdHJhaWxlcgo8PCAvU2l6ZSAxMzMgL1Jvb3QgMSAwIFIgL0luZm8gMiAw
 IFIKL0lEIFs8RjA2RUJFQkU2ODJDN0E3MTVBNTA4ODBBMDcxOTg0MkY+PEYwNkVCRUJFNjgyQzdB
 NzE1QTUwODgwQTA3MTk4NDJGPl0KPj4Kc3RhcnR4cmVmCjM0ODE3OQolJUVPRgo=
 """
-
+print os.getcwd()
 if not os.path.exists("Directory_Template_Manual.pdf"):
     with open("Directory_Template_Manual.pdf", "wb") as text_file:
         text_file.write(pdfSource.decode('base64', 'strict'))
