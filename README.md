@@ -1,5 +1,5 @@
 # HW Design Directory Template Generator
-Directory template generator dedicated to hardware design flow control.
+Directory template generator dedicated to hardware design flow control. #test
 
 ## Features
 * Simple, local control version mechanism provided by `BackMeUp.py` script. It creates zip archive with current timestamp.
