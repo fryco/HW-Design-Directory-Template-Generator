@@ -132,14 +132,12 @@ def CreatePaths(structure):
                 previousLevel = structure[idx][1]
                 previousPath = previousPath+slash+structure[idx][2]
                 previousDir = structure[idx][2]
-                __DebugPrint(structure, idx)
-                idx += 1
+##                __DebugPrint(structure, idx)
                 print previousPath
             elif previousMode == "ndir" and previousLevel == structure[idx][1]:
                 previousPath = previousPath+slash+structure[idx][2]
                 previousDir = structure[idx][2]
-                __DebugPrint(structure, idx)
-                idx += 1
+##                __DebugPrint(structure, idx)
                 print previousPath                
                 pass
             elif previousMode == "ndir" and previousLevel >  structure[idx][1]:
@@ -155,36 +153,42 @@ def CreatePaths(structure):
                 previousLevel = structure[idx][1]
                 previousPath = previousPath+slash+structure[idx][2]
                 previousDir = structure[idx][2]
-                __DebugPrint(structure, idx)
-                idx += 1
+##                __DebugPrint(structure, idx)
                 print previousPath
             else:
                 print "Error in ndir mode!\n"
-                __DebugPrint(structure, idx)                
+            idx += 1
+              
         elif structure[idx][0] == "ldir":
             if   previousMode == "ndir" and previousLevel <  structure[idx][1]:
                 previousLevel = structure[idx][1]
                 previousPath = previousPath+slash+structure[idx][2]
                 previousDir = structure[idx][2]
                 __DebugPrint(structure, idx)
-                idx += 1
                 print previousPath
             elif previousMode == "ndir" and previousLevel == structure[idx][1]:
                 pass
             elif previousMode == "ndir" and previousLevel >  structure[idx][1]:
                 pass
             if   previousMode == "ldir" and previousLevel <  structure[idx][1]:
-                pass
+                pass 
             elif previousMode == "ldir" and previousLevel == structure[idx][1]:
                 pass
             elif previousMode == "ldir" and previousLevel >  structure[idx][1]:
-                pass            
+                previousLevel = structure[idx][1]
+                previousPath = UpdatePath(previousPath)+slash+structure[idx][2]
+                print previousPath
+                previousDir = structure[idx][2]
+                __DebugPrint(structure, idx)
+                print previousPath             
             elif previousMode == "root":
                 pass
             else:
                 print "Error in ldir mode!\n"
+            __DebugPrint(structure, idx) ##################
+            idx += 1
         elif structure[idx][0] == "file":
-            pass
+            idx += 1
         else:
             print "ERROR!\n"
 
@@ -200,7 +204,7 @@ dirTemplate = __ReadFile(dirTemplateFilename)
 structure = ParseDirTemplate(dirTemplate)
 
 CreatePaths(structure)
-
+##
 ##for line in structure:
 ##    print line
 
