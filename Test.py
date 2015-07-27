@@ -110,99 +110,89 @@ def __UpdatePath(oldPath):
         result += elem+slash
     return result
 
-def CreatePaths(structure):
-    previousLevel = -1
-    previousMode  = ""
-    previousPath  = ""
-    previousDir   = ""
-    idx           = 0
-    rootPath = os.getcwd()+slash
-    
-    for line in structure:
-        if structure[idx][0] == "root":
-            previousMode = structure[idx][0]
-            previousLevel = structure[idx][1]
-            previousPath = rootPath+structure[idx][2]
-            previousDir = structure[idx][2]
-            __DebugPrint(structure, idx)
-            idx += 1
-            print previousPath
-        elif structure[idx][0] == "ndir":
-            if   previousMode == "ndir" and previousLevel <  structure[idx][1]:
-                previousLevel = structure[idx][1]
-                previousPath = previousPath+slash+structure[idx][2]
-                previousDir = structure[idx][2]
-##                __DebugPrint(structure, idx)
-                print previousPath
-            elif previousMode == "ndir" and previousLevel == structure[idx][1]:
-                previousPath = previousPath+slash+structure[idx][2]
-                previousDir = structure[idx][2]
-##                __DebugPrint(structure, idx)
-                print previousPath                
-                pass
-            elif previousMode == "ndir" and previousLevel >  structure[idx][1]:
-                pass
-            if   previousMode == "ldir" and previousLevel <  structure[idx][1]:
-                pass
-            elif previousMode == "ldir" and previousLevel == structure[idx][1]:
-                pass
-            elif previousMode == "ldir" and previousLevel >  structure[idx][1]:
-                pass            
-            elif previousMode == "root":
-                previousMode = structure[idx][0]
-                previousLevel = structure[idx][1]
-                previousPath = previousPath+slash+structure[idx][2]
-                previousDir = structure[idx][2]
-##                __DebugPrint(structure, idx)
-                print previousPath
-            else:
-                print "Error in ndir mode!\n"
-            idx += 1
-              
-        elif structure[idx][0] == "ldir":
-            if   previousMode == "ndir" and previousLevel <  structure[idx][1]:
-                previousLevel = structure[idx][1]
-                previousPath = previousPath+slash+structure[idx][2]
-                previousDir = structure[idx][2]
-                __DebugPrint(structure, idx)
-                print previousPath
-            elif previousMode == "ndir" and previousLevel == structure[idx][1]:
-                pass
-            elif previousMode == "ndir" and previousLevel >  structure[idx][1]:
-                pass
-            if   previousMode == "ldir" and previousLevel <  structure[idx][1]:
-                pass 
-            elif previousMode == "ldir" and previousLevel == structure[idx][1]:
-                pass
-            elif previousMode == "ldir" and previousLevel >  structure[idx][1]:
-                previousLevel = structure[idx][1]
-                previousPath = UpdatePath(previousPath)+slash+structure[idx][2]
-                print previousPath
-                previousDir = structure[idx][2]
-                __DebugPrint(structure, idx)
-                print previousPath             
-            elif previousMode == "root":
-                pass
-            else:
-                print "Error in ldir mode!\n"
-            __DebugPrint(structure, idx) ##################
-            idx += 1
-        elif structure[idx][0] == "file":
-            idx += 1
-        else:
-            print "ERROR!\n"
-
 def __GoUp(height):
     for level in xrange(0,height,1):
         os.chdir("..")
 
 def __GoDown(directory):
     os.chdir(os.getcwd()+slash+directory)
-                  
+    
+def CreatePaths(structure):
+    lastDepth     = -1
+    lastMode      = ""
+    lastPath      = ""
+    currentPath   = ""
+    previousDir   = ""
+    idx           = 0
+    rootPath = os.getcwd()+slash
+    
+    for line in structure:
+        if structure[idx][0] == "root":
+            lastMode  = structure[idx][0]
+            lastDepth = structure[idx][1]
+            lastPath  = rootPath+structure[idx][2]
+            lastDir   = structure[idx][2]
+            __DebugPrint(structure, idx)
+            idx      += 1
+            print lastPath
+        elif structure[idx][0] == "ndir":
+            if   lastMode == "ndir" and lastDepth <  structure[idx][1]:
+                pass                            
+            elif lastMode == "ndir" and lastDepth == structure[idx][1]:
+                lastPath  = rootPath+structure[idx][2]
+                lastDir   = structure[idx][2]
+                __DebugPrint(structure, idx)
+                idx      += 1
+                print lastPath             
+            elif lastMode == "ndir" and lastDepth >  structure[idx][1]:
+                 pass  
+            elif lastMode == "ldir" and lastDepth <  structure[idx][1]:
+                pass
+            elif lastMode == "ldir" and lastDepth == structure[idx][1]:
+                pass
+            elif lastMode == "ldir" and lastDepth >  structure[idx][1]:
+                pass            
+            elif lastMode == "root":
+                lastPath  = rootPath+structure[idx][2]
+                lastDir   = structure[idx][2]
+                __DebugPrint(structure, idx)
+                idx      += 1
+                print lastPath 
+            else:
+                print "Error in ndir mode!\n"
+            idx += 1
+              
+        elif structure[idx][0] == "ldir":
+            if   lastMode == "ndir" and lastDepth <  structure[idx][1]:
+                pass
+            elif lastMode == "ndir" and lastDepth == structure[idx][1]:
+                pass
+            elif lastMode == "ndir" and lastDepth >  structure[idx][1]:
+                pass
+            elif lastMode == "ldir" and lastDepth <  structure[idx][1]:
+                pass 
+            elif lastMode == "ldir" and lastDepth == structure[idx][1]:
+                pass
+            elif lastMode == "ldir" and lastDepth >  structure[idx][1]:
+                 pass         
+            elif lastMode == "root":
+                print "###\n### Tree has been generated!!!"
+            else:
+                print "Error in ldir mode!\n"
+            idx += 1
+        elif structure[idx][0] == "file":
+            idx += 1
+        else:
+            print "Generic error!\n"
+        if idx>=len(structure):
+            break
+
+                 
 ##############
 dirTemplate = __ReadFile(dirTemplateFilename)
-structure = ParseDirTemplate(dirTemplate)
 
+structure = ParseDirTemplate(dirTemplate)
+##print len(structure)
 CreatePaths(structure)
 ##
 ##for line in structure:
