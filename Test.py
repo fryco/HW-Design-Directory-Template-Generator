@@ -39,7 +39,7 @@ projectNameAsRootDir = False
 
 dirTemplateFilename = "DirectoryTemplate.txt"
 
-def CreateDir(dirName):
+def __CreateDir(dirName):
     try:
         os.makedirs(dirName)
         print "###\n### Directory %s has been created" \
@@ -51,18 +51,18 @@ def CreateDir(dirName):
             print "###\n### BE CAREFUL! Directory %s already exists.\n###" \
             % dirName
             
-def SaveFile(string, fname):
+def __SaveFile(string, fname):
     with open(fname, "w") as textFile:
         textFile.write(string)
 
-def CreateFile(string, overwrite=False,fname="read_me.txt"):
+def __CreateFile(string, overwrite=False,fname="read_me.txt"):
     if overwrite:
         SaveFile(string, fname)
     else:
         if not os.path.exists(fname):
             SaveFile(string, fname)
                 
-def ReadFile(filename):
+def __ReadFile(filename):
     with open(filename, "r") as textFile:
         result = list(textFile)        
     return result
@@ -79,76 +79,130 @@ def ParseDirTemplate(template):
     fPat   = re.compile(filePattern)
     
     structure = []
-    
+    parent = "root"
+
     for line in dirTemplate:
         if rdPat.match(line):
             result = line.rfind("\\")
-            structure.append(("root", result,line[result+4:].rstrip("\n")))
+            structure.append(["root", result,line[result+4:].rstrip("\n")])
         elif dPat.search(line):
             result = line.rfind("+")         
-            structure.append(("ndir", result/4, line[result+4:].rstrip("\n")))
+            structure.append(["ndir", result/4, line[result+4:].rstrip("\n")])
         elif ldPat.search(line):
             result = line.rfind("\\")         
-            structure.append(("ldir", result/4, line[result+4:].rstrip("\n")))
+            structure.append(["ldir", result/4, line[result+4:].rstrip("\n")])
         elif fPat.search(line):
             result = line.rfind("#")         
-            structure.append(("file", result/4, line[result+4:].rstrip("\n")))
+            structure.append(["file", result/4, line[result+4:].rstrip("\n")])
         else:
             print "Incorrect syntax or empty line!!"
     return structure
 
-def GoUp(height):
+def __DebugPrint(structure,i):
+    print "### Mode: "+structure[i][0]+" Depth: "+str(structure[i][1])+" Name: "+structure[i][2]
+
+def __UpdatePath(oldPath):
+    tmpPath = oldPath.split(slash)
+    del tmpPath[-1]
+    result = ""
+
+    for elem in tmpPath:
+        result += elem+slash
+    return result
+
+def CreatePaths(structure):
+    previousLevel = -1
+    previousMode  = ""
+    previousPath  = ""
+    previousDir   = ""
+    idx           = 0
+    rootPath = os.getcwd()+slash
+    
+    for line in structure:
+        if structure[idx][0] == "root":
+            previousMode = structure[idx][0]
+            previousLevel = structure[idx][1]
+            previousPath = rootPath+structure[idx][2]
+            previousDir = structure[idx][2]
+            __DebugPrint(structure, idx)
+            idx += 1
+            print previousPath
+        elif structure[idx][0] == "ndir":
+            if   previousMode == "ndir" and previousLevel <  structure[idx][1]:
+                previousLevel = structure[idx][1]
+                previousPath = previousPath+slash+structure[idx][2]
+                previousDir = structure[idx][2]
+                __DebugPrint(structure, idx)
+                idx += 1
+                print previousPath
+            elif previousMode == "ndir" and previousLevel == structure[idx][1]:
+                previousPath = previousPath+slash+structure[idx][2]
+                previousDir = structure[idx][2]
+                __DebugPrint(structure, idx)
+                idx += 1
+                print previousPath                
+                pass
+            elif previousMode == "ndir" and previousLevel >  structure[idx][1]:
+                pass
+            if   previousMode == "ldir" and previousLevel <  structure[idx][1]:
+                pass
+            elif previousMode == "ldir" and previousLevel == structure[idx][1]:
+                pass
+            elif previousMode == "ldir" and previousLevel >  structure[idx][1]:
+                pass            
+            elif previousMode == "root":
+                previousMode = structure[idx][0]
+                previousLevel = structure[idx][1]
+                previousPath = previousPath+slash+structure[idx][2]
+                previousDir = structure[idx][2]
+                __DebugPrint(structure, idx)
+                idx += 1
+                print previousPath
+            else:
+                print "Error in ndir mode!\n"
+                __DebugPrint(structure, idx)                
+        elif structure[idx][0] == "ldir":
+            if   previousMode == "ndir" and previousLevel <  structure[idx][1]:
+                previousLevel = structure[idx][1]
+                previousPath = previousPath+slash+structure[idx][2]
+                previousDir = structure[idx][2]
+                __DebugPrint(structure, idx)
+                idx += 1
+                print previousPath
+            elif previousMode == "ndir" and previousLevel == structure[idx][1]:
+                pass
+            elif previousMode == "ndir" and previousLevel >  structure[idx][1]:
+                pass
+            if   previousMode == "ldir" and previousLevel <  structure[idx][1]:
+                pass
+            elif previousMode == "ldir" and previousLevel == structure[idx][1]:
+                pass
+            elif previousMode == "ldir" and previousLevel >  structure[idx][1]:
+                pass            
+            elif previousMode == "root":
+                pass
+            else:
+                print "Error in ldir mode!\n"
+        elif structure[idx][0] == "file":
+            pass
+        else:
+            print "ERROR!\n"
+
+def __GoUp(height):
     for level in xrange(0,height,1):
         os.chdir("..")
 
-def GoDown(directory):
+def __GoDown(directory):
     os.chdir(os.getcwd()+slash+directory)
-        
-def DebugPrint(structure,i):
-    print "Mode: "+structure[i][0]+" Depth: "+str(structure[i][1])+" Name: "+structure[i][2]  
-
-def CreateDirectoryTree(structure):
-    i = 0
-    currrentMode = ""    
-    currentDepth = 0
-    print len(structure)
-    for i in xrange(0,len(structure),1):
-        if structure[i][0] == "root":
-            currentMode  = structure[i][0]            
-            currentDepth = structure[i][1]
-            CreateDir(structure[i][2])
-            GoDown(structure[i][2])
-            DebugPrint(structure,i)
-        elif structure[i][0] == "ndir":
-            if currentDepth - structure[i][1] < 0:
-                currentMode  = structure[i][0]            
-                currentDepth = structure[i][1]
-                CreateDir(structure[i][2])
-                GoDown(structure[i][2])                
-                DebugPrint(structure,i)                
-            elif currentDepth == structure[i][1]:
-                 currentMode  = structure[i][0]
-                 CreateDir(structure[i][2])
-                 DebugPrint(structure,i)
-            elif currentDepth > structure[i][1]:
-                 GoUp(currentDepth - structure[i][1])
-                 currentMode  = structure[i][0]            
-                 currentDepth = structure[i][1]
-                 CreateDir(structure[i][2])
-                 GoDown(structure[i][2])                                 
-                 DebugPrint(structure,i)
-        elif structure[i][0] == "ldir":
-                pass
-        elif structure[i][0] == "file":
-                pass
-        else:
-            print "ERROR!"
-            
+                  
 ##############
-dirTemplate = ReadFile(dirTemplateFilename)
+dirTemplate = __ReadFile(dirTemplateFilename)
 structure = ParseDirTemplate(dirTemplate)
 
-for line in structure:
-    print line
+CreatePaths(structure)
+
+##for line in structure:
+##    print line
+
 
 
