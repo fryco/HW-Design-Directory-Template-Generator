@@ -1,6 +1,6 @@
 \---_ProjectName
     +---Design Files
-    |   +---!_EDATool Specific Files
+    |   +---_EDATool Specific Files
     |   |   +---_EDATool Integrated Library
     |   |   |   \---3D models
     |   |   \---_EDATool Templates

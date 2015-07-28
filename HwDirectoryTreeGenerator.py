@@ -13,11 +13,11 @@ elif _platform == "win32":
     slash = '\\'
 
 # Project client name.
-clientName = '_ClientName'
+clientName = '__ClientName'
 
 # If 'projectName' will be empty, script will fetch current directory
 # name and uses it as project name.
-projectName = '_ProjectName'
+projectName = '__ProjectName'
 
 if not projectName:
     projectName = os.path.relpath(".","..")
@@ -25,17 +25,8 @@ if not projectName:
 # Most work will be done with KiCAD EDA so it will be default value of
 # 'toolName'. If you are using different software, please put its name
 # here.
-toolName = '_ToolName'
+toolName = 'EDAtool'
 
-# If you want to create root directory named as projectName you have
-# to set this flag to True. It depends on user needs:
-#    - if user is using Git or SVN it is better to use False. After
-#      creating repository user should copy script into repo dir and run it.
-#    - if user is not using any control version system it is better to put
-#      script in dedicated directory with all HW projects, set flag to True
-#      and perform manual setup before script will be run. In this case
-#      user can do manual version control and backup with BackMeUp.py script.
-projectNameAsRootDir = False
 
 dirTemplateFilename = "DirectoryTemplate.txt"
 
@@ -98,11 +89,20 @@ def ParseDirTemplate(template):
             print "Incorrect syntax or empty line!!"
     return structure
 
+def PersonalizeProject(structure):
+    idx  = 0
+    
+    for line in structure:
+        if structure[idx][2] == "_ProjectName":
+            structure[idx][2] = projectName
+        if structure[idx][2] == "_ClientName":
+            structure[idx][2] = clientName
+        if structure[idx][2].find("EDATool"):
+            structure[idx][2] = structure[idx][2].replace("EDATool", toolName)
+        idx += 1            
+    
 def __DebugPrint(structure,i):
     print "### "+str(i)+"\nMode:  "+structure[i][0]+"\nDepth: "+str(structure[i][1])+"\nName:  "+structure[i][2]
-
-def __DebugPrintE(structure,i, mode):
-    print mode+' '+str(i)+"\nMode:  "+structure[i][0]+"\nDepth: "+str(structure[i][1])+"\nName:  "+structure[i][2]
 
 def __UpdatePath(oldPath, depthLevel):
     result = ""
@@ -114,13 +114,6 @@ def __UpdatePath(oldPath, depthLevel):
         result += elem+slash
     return result
 
-def __GoUp(height):
-    for level in xrange(0,height,1):
-        os.chdir("..")
-
-def __GoDown(directory):
-    os.chdir(os.getcwd()+slash+directory)
-    
 def CreatePaths(structure):
     lastDepth     = -1
     lastMode      = ""
@@ -136,8 +129,7 @@ def CreatePaths(structure):
             lastDepth = structure[idx][1]
             lastPath  = rootPath+structure[idx][2]
             lastDir   = structure[idx][2]
-            print lastPath
-            
+            __CreateDir(lastPath)
             idx +=1
         elif structure[idx][0] == "dir":
             if lastMode == "root" and lastDepth < structure[idx][1]:
@@ -145,19 +137,19 @@ def CreatePaths(structure):
                 lastDepth = structure[idx][1]
                 lastPath  = lastPath+slash+structure[idx][2]
                 lastDir   = structure[idx][2]
-                print lastPath
+                __CreateDir(lastPath)
             elif lastMode == "dir" and lastDepth < structure[idx][1]:
                 lastMode  = structure[idx][0]
                 lastDepth = structure[idx][1]
                 lastPath  = lastPath+slash+structure[idx][2]
                 lastDir   = structure[idx][2]
-                print lastPath
+                __CreateDir(lastPath)
             elif lastMode == "dir" and lastDepth == structure[idx][1]:
                 lastMode  = structure[idx][0]
                 lastDepth = structure[idx][1]
                 lastPath  = __UpdatePath(lastPath, 1)+structure[idx][2]
                 lastDir   = structure[idx][2]
-                print lastPath
+                __CreateDir(lastPath)
             elif lastMode == "dir" and lastDepth > structure[idx][1]:
                 lastMode  = structure[idx][0]
                 depthDiff = lastDepth - structure[idx][1]
@@ -165,7 +157,7 @@ def CreatePaths(structure):
                 newPath   = __UpdatePath(str(lastPath), depthDiff+1)+structure[idx][2]
                 lastPath  = newPath
                 lastDir   = structure[idx][2]
-                print lastPath                  
+                __CreateDir(lastPath)             
             else:
                 print "Error!"
 
@@ -184,11 +176,11 @@ def CreatePaths(structure):
 dirTemplate = __ReadFile(dirTemplateFilename)
 
 structure = ParseDirTemplate(dirTemplate)
-##print len(structure)
+PersonalizeProject(structure)
 CreatePaths(structure)
 
-##for line in structure:
-##    print line
-##
+for line in structure:
+    print line
+
 
 
