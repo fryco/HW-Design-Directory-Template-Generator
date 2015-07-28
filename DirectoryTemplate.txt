@@ -1,59 +1,100 @@
 \---_ProjectName
+    #---readMe.txt
     +---Design Files
     |   +---_EDATool Specific Files
     |   |   +---_EDATool Integrated Library
+    |   |   |   #---readMe.txt
     |   |   |   \---3D models
     |   |   \---_EDATool Templates
+    |   |       #---readMe.txt
     |   \---_ClientName
     |       \---_ProjectName
-    |           #---file111
+    |           #---readMe.txt
     |           +---Backup
+    |           #---BackMeUp.py
     |           +---Docs
-    |           #---file
+    |           |   #---ReadMe.txt
     |           +---V1I1
+    |           |   #---ReadMe.txt
     |           |   +---Firmware
-    |           |   #---frmfile
+    |           |   |   #---ReadMe.txt
     |           |   \---TODO
+    |           |       #---ToDo.txt
     |           \---VxIx
+    |               #---ReadMe.txt
     |               +---Firmware
+    |               |   #---ReadMe.txt
     |               \---TODO
+    |                   #---ToDo.txt
     +---Released Files
+    |   #---!!!ImportantReadMe!!!.txt
     |   \---_ClientName
     |       \---_ProjectName
+    |           #---ReadMe.txt
     |           +---V1I1
     |           |   +---3D
+    |           |   |   #---ReadMe.txt
     |           |   +---Board Assembly
+    |           |   |   #---ReadMe.txt
     |           |   +---Firmware
+    |           |   |   #---ReadMe.txt
     |           |   +---PCB Manufacturing
+    |           |   |   #---ReadMe.txt
     |           |   |   +---Gerber Output
+    |           |   |   |   #---ReadMe.txt
     |           |   |   +---Layers with Highlighted Differential Pairs
+    |           |   |   |   #---ReadMe.txt
     |           |   |   \---NC Drill Output
+    |           |   |       #---ReadMe.txt
     |           |   +---Schematic
+    |           |   |   #---ReadMe.txt
     |           |   \---Source Files
+    |           |       #---ReadMe.txt
     |           \---VxIx
     |               +---3D
+    |               |   #---ReadMe.txt
     |               +---Board Assembly
+    |               |   #---ReadMe.txt
     |               +---Firmware
+    |               |   #---ReadMe.txt
     |               +---PCB Manufacturing
+    |               |   #---ReadMe.txt
     |               |   +---Gerber Output
+    |               |   |   #---ReadMe.txt
     |               |   +---Layers with Highlighted Differential Pairs
+    |               |   |   #---ReadMe.txt
     |               |   \---NC Drill Output
+    |               |       #---ReadMe.txt
     |               +---Schematic
+    |               |   #---ReadMe.txt
     |               \---Source Files
+    |                   #---ReadMe.txt
     \---Work
         \---_ClientName
             \---_ProjectName
                 +---V1I1
                 |   +---Competition and Similar Products
+                |   |   #---ReadMe.txt
                 |   +---Datasheets
+                |   |   #---ReadMe.txt
                 |   +---Design Guides
+                |   |   #---ReadMe.txt
                 |   +---Development Boards
+                |   |   #---ReadMe.txt
                 |   +---Errata
+                |   |   #---ReadMe.txt
                 |   \---Software
+                |       #---ReadMe.txt
                 \---VxIx
                     +---Competition and Similar Products
+                    |   #---ReadMe.txt
                     +---Datasheets
+                    |   #---ReadMe.txt
                     +---Design Guides
+                    |   #---ReadMe.txt
                     +---Development Boards
+                    |   #---ReadMe.txt
                     +---Errata
+                    |   #---ReadMe.txt
                     \---Software
+                        #---ReadMe.txt

@@ -13,11 +13,11 @@ elif _platform == "win32":
     slash = '\\'
 
 # Project client name.
-clientName = '__ClientName'
+clientName = 'MalyGrubyBenek'
 
 # If 'projectName' will be empty, script will fetch current directory
 # name and uses it as project name.
-projectName = '__ProjectName'
+projectName = 'TelebulbleMator'
 
 if not projectName:
     projectName = os.path.relpath(".","..")
@@ -25,33 +25,42 @@ if not projectName:
 # Most work will be done with KiCAD EDA so it will be default value of
 # 'toolName'. If you are using different software, please put its name
 # here.
-toolName = 'EDAtool'
+toolName = 'KiCAD'
 
 
 dirTemplateFilename = "DirectoryTemplate.txt"
+fileContainer = []
 
 def __CreateDir(dirName):
     try:
         os.makedirs(dirName)
-        print "###\n### Directory %s has been created" \
-        % dirName
+##        print "###\n### Directory %s has been created" \
+##        % dirName
     except OSError as exception:
         if exception.errno != errno.EEXIST:
             raise
         else:
-            print "###\n### BE CAREFUL! Directory %s already exists.\n###" \
-            % dirName
+            pass
+##            print "###\n### BE CAREFUL! Directory %s already exists.\n###" \
+##            % dirName
             
 def __SaveFile(string, fname):
     with open(fname, "w") as textFile:
         textFile.write(string)
 
-def __CreateFile(string, overwrite=False,fname="read_me.txt"):
+def __CreateFile(string, fname, overwrite=False):
     if overwrite:
-        SaveFile(string, fname)
+        __SaveFile(string, fname)
     else:
         if not os.path.exists(fname):
-            SaveFile(string, fname)
+            __SaveFile(string, fname)
+
+def __CreateDummyFile(fname, overwrite=False):
+    if overwrite:
+        __SaveFile("", fname)
+    else:
+        if not os.path.exists(fname):
+            __SaveFile("", fname)            
                 
 def __ReadFile(filename):
     with open(filename, "r") as textFile:
@@ -163,8 +172,14 @@ def CreatePaths(structure):
 
             idx += 1           
         elif structure[idx][0] == "file":
-            print "file"+str(idx)              
-
+            if structure[idx][1] > lastDepth:
+##                fileContainer.append(lastPath+slash+structure[idx][2])
+                __CreateDummyFile(lastPath+slash+structure[idx][2])
+            elif structure[idx][1] == lastDepth:
+##                fileContainer.append(__UpdatePath(lastPath,1)+structure[idx][2])
+                __CreateDummyFile(__UpdatePath(lastPath,1)+structure[idx][2])
+            else:
+                print "Error in file!"
             idx += 1
         else:
             print "Generic error!!!!!!!!!!!!!!"
@@ -182,5 +197,6 @@ CreatePaths(structure)
 for line in structure:
     print line
 
-
+for line in fileContainer:
+    print line
 
