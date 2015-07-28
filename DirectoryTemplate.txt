@@ -7,7 +7,7 @@
     |   \---_ClientName
     |       \---_ProjectName
     |           #---file111
-    |           +---Backup (optional)
+    |           +---Backup
     |           +---Docs
     |           #---file
     |           +---V1I1

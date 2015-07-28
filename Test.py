@@ -87,10 +87,10 @@ def ParseDirTemplate(template):
             structure.append(["root", result,line[result+4:].rstrip("\n")])
         elif dPat.search(line):
             result = line.rfind("+")         
-            structure.append(["ndir", result/4, line[result+4:].rstrip("\n")])
+            structure.append(["dir", result/4, line[result+4:].rstrip("\n")])
         elif ldPat.search(line):
             result = line.rfind("\\")         
-            structure.append(["ldir", result/4, line[result+4:].rstrip("\n")])
+            structure.append(["dir", result/4, line[result+4:].rstrip("\n")])            
         elif fPat.search(line):
             result = line.rfind("#")         
             structure.append(["file", result/4, line[result+4:].rstrip("\n")])
@@ -99,12 +99,16 @@ def ParseDirTemplate(template):
     return structure
 
 def __DebugPrint(structure,i):
-    print "### Mode: "+structure[i][0]+" Depth: "+str(structure[i][1])+" Name: "+structure[i][2]
+    print "### "+str(i)+"\nMode:  "+structure[i][0]+"\nDepth: "+str(structure[i][1])+"\nName:  "+structure[i][2]
 
-def __UpdatePath(oldPath):
-    tmpPath = oldPath.split(slash)
-    del tmpPath[-1]
+def __DebugPrintE(structure,i, mode):
+    print mode+' '+str(i)+"\nMode:  "+structure[i][0]+"\nDepth: "+str(structure[i][1])+"\nName:  "+structure[i][2]
+
+def __UpdatePath(oldPath, depthLevel):
     result = ""
+    tmpPath = oldPath.split(slash)
+    for i in range(0,depthLevel,1):
+        del tmpPath[-1]
 
     for elem in tmpPath:
         result += elem+slash
@@ -132,58 +136,46 @@ def CreatePaths(structure):
             lastDepth = structure[idx][1]
             lastPath  = rootPath+structure[idx][2]
             lastDir   = structure[idx][2]
-            __DebugPrint(structure, idx)
-            idx      += 1
             print lastPath
-        elif structure[idx][0] == "ndir":
-            if   lastMode == "ndir" and lastDepth <  structure[idx][1]:
-                pass                            
-            elif lastMode == "ndir" and lastDepth == structure[idx][1]:
-                lastPath  = rootPath+structure[idx][2]
+            
+            idx +=1
+        elif structure[idx][0] == "dir":
+            if lastMode == "root" and lastDepth < structure[idx][1]:
+                lastMode  = structure[idx][0]
+                lastDepth = structure[idx][1]
+                lastPath  = lastPath+slash+structure[idx][2]
                 lastDir   = structure[idx][2]
-                __DebugPrint(structure, idx)
-                idx      += 1
-                print lastPath             
-            elif lastMode == "ndir" and lastDepth >  structure[idx][1]:
-                 pass  
-            elif lastMode == "ldir" and lastDepth <  structure[idx][1]:
-                pass
-            elif lastMode == "ldir" and lastDepth == structure[idx][1]:
-                pass
-            elif lastMode == "ldir" and lastDepth >  structure[idx][1]:
-                pass            
-            elif lastMode == "root":
-                lastPath  = rootPath+structure[idx][2]
+                print lastPath
+            elif lastMode == "dir" and lastDepth < structure[idx][1]:
+                lastMode  = structure[idx][0]
+                lastDepth = structure[idx][1]
+                lastPath  = lastPath+slash+structure[idx][2]
                 lastDir   = structure[idx][2]
-                __DebugPrint(structure, idx)
-                idx      += 1
-                print lastPath 
+                print lastPath
+            elif lastMode == "dir" and lastDepth == structure[idx][1]:
+                lastMode  = structure[idx][0]
+                lastDepth = structure[idx][1]
+                lastPath  = __UpdatePath(lastPath, 1)+structure[idx][2]
+                lastDir   = structure[idx][2]
+                print lastPath
+            elif lastMode == "dir" and lastDepth > structure[idx][1]:
+                lastMode  = structure[idx][0]
+                depthDiff = lastDepth - structure[idx][1]
+                lastDepth = structure[idx][1]             
+                newPath   = __UpdatePath(str(lastPath), depthDiff+1)+structure[idx][2]
+                lastPath  = newPath
+                lastDir   = structure[idx][2]
+                print lastPath                  
             else:
-                print "Error in ndir mode!\n"
-            idx += 1
-              
-        elif structure[idx][0] == "ldir":
-            if   lastMode == "ndir" and lastDepth <  structure[idx][1]:
-                pass
-            elif lastMode == "ndir" and lastDepth == structure[idx][1]:
-                pass
-            elif lastMode == "ndir" and lastDepth >  structure[idx][1]:
-                pass
-            elif lastMode == "ldir" and lastDepth <  structure[idx][1]:
-                pass 
-            elif lastMode == "ldir" and lastDepth == structure[idx][1]:
-                pass
-            elif lastMode == "ldir" and lastDepth >  structure[idx][1]:
-                 pass         
-            elif lastMode == "root":
-                print "###\n### Tree has been generated!!!"
-            else:
-                print "Error in ldir mode!\n"
-            idx += 1
+                print "Error!"
+
+            idx += 1           
         elif structure[idx][0] == "file":
+            print "file"+str(idx)              
+
             idx += 1
         else:
-            print "Generic error!\n"
+            print "Generic error!!!!!!!!!!!!!!"
         if idx>=len(structure):
             break
 
@@ -194,9 +186,9 @@ dirTemplate = __ReadFile(dirTemplateFilename)
 structure = ParseDirTemplate(dirTemplate)
 ##print len(structure)
 CreatePaths(structure)
-##
+
 ##for line in structure:
 ##    print line
-
+##
 
 
