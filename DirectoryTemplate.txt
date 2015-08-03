@@ -1,16 +1,18 @@
 \---_ProjectName
-    #---readMe.txt
+    #---ReadMe.txt
     +---Design Files
     |   +---_EDATool Specific Files
     |   |   +---_EDATool Integrated Library
-    |   |   |   #---readMe.txt
+    |   |   |   #---ReadMe.txt
     |   |   |   \---3D models
+    |   |   |       #---ReadMe.txt
     |   |   \---_EDATool Templates
     |   |       #---readMe.txt
     |   \---_ClientName
     |       \---_ProjectName
     |           #---readMe.txt
     |           +---Backup
+    |           |   #---readMe.txt
     |           #---BackMeUp.py
     |           +---Docs
     |           |   #---ReadMe.txt
