@@ -49,7 +49,7 @@ When you add new text file on any level, you have to also add content for this f
     |       \---_ProjectName
     |           #---ReadMe.txt
     |           +---Backup
-    |           |   #---readMe.txt
+    |           |   #---ReadMe.txt
     |           #---BackMeUp.py
     |           +---Docs
     |           |   #---ReadMe.txt
