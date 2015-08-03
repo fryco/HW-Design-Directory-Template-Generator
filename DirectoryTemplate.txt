@@ -7,12 +7,12 @@
     |   |   |   \---3D models
     |   |   |       #---ReadMe.txt
     |   |   \---_EDATool Templates
-    |   |       #---readMe.txt
+    |   |       #---ReadMe.txt
     |   \---_ClientName
     |       \---_ProjectName
-    |           #---readMe.txt
+    |           #---ReadMe.txt
     |           +---Backup
-    |           |   #---readMe.txt
+    |           |   #---ReadMe.txt
     |           #---BackMeUp.py
     |           +---Docs
     |           |   #---ReadMe.txt
