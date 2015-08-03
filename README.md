@@ -2,9 +2,9 @@
 Directory template generator dedicated to hardware design flow control.
 
 ## Features
-* Simple, local control version mechanism provided by `BackMeUp.py` script. It creates zip archive with current design files.
 * Easy development and maintenance. 
 * Generic approach to generating directory tree structure allows to use this script in your own application.
+* Simple, local control version mechanism provided by `BackMeUp.py` script. It creates zip archive with current design files.
 
 ## Usage: 
 
@@ -23,11 +23,11 @@ For detailed directory tree description please check `Directory_Template_Manual.
 ## Modifying directory structure
 Directory structure is described in 'DirectoryTemplate.txt'. You can use tree available definitions:
 
-1. '\---' - describes last directory on current depth level,
+1. `\---` - describes last directory on current depth level,
 
-2. '+---' - describes directory on current depth level,
+2. `+---` - describes directory on current depth level,
 
-3. '#---' - file on current depth level.
+3. `#---` - file on current depth level.
 
 Depth is described by amount of spaces. Increasing number of spaces by four will cause increasing depth level. It is important to keep specyfic amount of whitespaces, beacuse directory tree parsers uses them for distinguishing depth levels.
 
