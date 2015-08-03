@@ -1,7 +1,8 @@
-__version__ = '1.4'
+__version__ = '2.2'
 import os
 import errno
 from sys import platform as _platform
+import re
 
 # Backslash alignment between different OSes
 if _platform == "linux" or _platform == "linux2":
@@ -24,90 +25,169 @@ if not projectName:
 # Most work will be done with KiCAD EDA so it will be default value of
 # 'toolName'. If you are using different software, please put its name
 # here.
-toolName = '_ToolName'
+toolName = '_EDAToolName'
 
-# If you want to create root directory named as projectName you have
-# to set this flag to True. It depends on user needs:
-#    - if user is using Git or SVN it is better to use False. After
-#      creating repository user should copy script into repo dir and run it.
-#    - if user is not using any control version system it is better to put
-#      script in dedicated directory with all HW projects, set flag to True
-#      and perform manual setup before script will be run. In this case
-#      user can do manual version control and backup with BackMeUp.py script.
-projectNameAsRootDir = False
+dirTemplateFilename = "DirectoryTemplate.txt"
+fileContainer = []
+fileContent   = []
 
-def MakeDir(dirName):
+def __CreateDir(dirName):
     try:
         os.makedirs(dirName)
-        print "###\n### Directory %s has been created" \
-        % dirName
     except OSError as exception:
         if exception.errno != errno.EEXIST:
             raise
         else:
-            print "###\n### BE CAREFUL! Directory %s already exists.\n###" \
-            % dirName
-            
-def SaveTxtFile(string, overwrite=False,fname="read_me.txt"):
+            pass
+
+def __ReadFile(filename):
+    with open(filename, "r") as textFile:
+        result = list(textFile)        
+    return result
+
+def __SaveFile(string, fname):
+    with open(fname, "w") as textFile:
+        textFile.write(string)
+
+def __CreateFile(string, fname, overwrite=True):
     if overwrite:
-        with open(fname, "w") as text_file:
-            text_file.write(string)
+        __SaveFile(string, fname)
     else:
         if not os.path.exists(fname):
-            with open(fname, "w") as text_file:
-                text_file.write(string)
-   
-# ./
-if projectNameAsRootDir:
-    MakeDir(projectName)
+            __SaveFile(string, fname)   
+                
+def ParseDirTemplate(template):
+    rootPattern    = r'(\\---)'
+    dirPattern     = r'(.\+---)'
+    lastDirPattern = r'(.\\---)'
+    filePattern    = r'(.#---)'    
 
-# ./Project/
-if projectNameAsRootDir:
-    os.chdir("."+slash+projectName)
-projectReadMe = \
+    rdPat  = re.compile(rootPattern)
+    dPat   = re.compile(dirPattern)
+    ldPat  = re.compile(lastDirPattern)
+    fPat   = re.compile(filePattern)
+    
+    structure = []
+
+    for line in dirTemplate:
+        if rdPat.match(line):
+            result = line.rfind("\\")
+            structure.append(["root", result,line[result+4:].rstrip("\n")])
+        elif dPat.search(line):
+            result = line.rfind("+")         
+            structure.append(["dir", result/4, line[result+4:].rstrip("\n")])
+        elif ldPat.search(line):
+            result = line.rfind("\\")         
+            structure.append(["dir", result/4, line[result+4:].rstrip("\n")])            
+        elif fPat.search(line):
+            result = line.rfind("#")         
+            structure.append(["file", result/4, line[result+4:].rstrip("\n")])
+        else:
+            print "Incorrect syntax or empty line!!"
+    return structure      
+    
+def __UpdatePath(oldPath, depthLevel):
+    result = ""
+    tmpPath = oldPath.split(slash)
+    for i in range(0,depthLevel,1):
+        del tmpPath[-1]
+
+    for elem in tmpPath:
+        result += elem+slash
+    return result
+
+def CreatePaths(structure):
+    lastDepth     = -1
+    lastMode      = ""
+    lastPath      = ""
+    currentPath   = ""
+    previousDir   = ""
+    rootPath = os.getcwd()+slash
+    
+    for idx, line in enumerate(structure):
+        if structure[idx][0] == "root":
+            lastMode  = structure[idx][0]
+            lastDepth = structure[idx][1]
+            lastPath  = rootPath+structure[idx][2]
+            lastDir   = structure[idx][2]
+            __CreateDir(lastPath)
+        elif structure[idx][0] == "dir":
+            if lastMode == "root" and lastDepth < structure[idx][1]:
+                lastMode  = structure[idx][0]
+                lastDepth = structure[idx][1]
+                lastPath  = lastPath+slash+structure[idx][2]
+                lastDir   = structure[idx][2]
+                __CreateDir(lastPath)
+            elif lastMode == "dir" and lastDepth < structure[idx][1]:
+                lastMode  = structure[idx][0]
+                lastDepth = structure[idx][1]
+                lastPath  = lastPath+slash+structure[idx][2]
+                lastDir   = structure[idx][2]
+                __CreateDir(lastPath)
+            elif lastMode == "dir" and lastDepth == structure[idx][1]:
+                lastMode  = structure[idx][0]
+                lastDepth = structure[idx][1]
+                lastPath  = __UpdatePath(lastPath, 1)+structure[idx][2]
+                lastDir   = structure[idx][2]
+                __CreateDir(lastPath)
+            elif lastMode == "dir" and lastDepth > structure[idx][1]:
+                lastMode  = structure[idx][0]
+                depthDiff = lastDepth - structure[idx][1]
+                lastDepth = structure[idx][1]             
+                newPath   = __UpdatePath(str(lastPath), depthDiff+1)+structure[idx][2]
+                lastPath  = newPath
+                lastDir   = structure[idx][2]
+                __CreateDir(lastPath)             
+            else:
+                print "Error!"         
+        elif structure[idx][0] == "file":
+            if structure[idx][1] > lastDepth:
+                fileContainer.append(lastPath+slash+structure[idx][2])
+            elif structure[idx][1] == lastDepth:
+                fileContainer.append(__UpdatePath(lastPath,1)+structure[idx][2])
+            else:
+                print "Error in file!"
+        else:
+            print "Generic error!!!!!!!!!!!!!!"
+        
+def PersonalizeProject(structure):
+    for idx, line in enumerate(structure):
+        if structure[idx][2] == "_ProjectName":
+            structure[idx][2] = projectName
+        if structure[idx][2] == "_ClientName":
+            structure[idx][2] = clientName
+        if structure[idx][2].find("EDATool"):
+            structure[idx][2] = structure[idx][2].replace("EDATool", toolName)
+
+def FillTextFiles(fContainer, fContent):
+    for idx, path in enumerate(fContainer):
+        __CreateFile(fContent[idx], path)
+
+        
+##############        
+projectNameReadMe = \
 """Design Files - place this directory on a server with regular backup.
 Release Files - place this directory on a server with regular backup. Once released, NEVER CHANGE THESE FILES and DO NOT WORK IN THIS DIRECTORY!
 Work - place this directory on your computer.
 """
-SaveTxtFile(projectReadMe)
-MakeDir("Design Files")
-# ./Project/Design Files
-os.chdir(os.getcwd()+slash+"Design Files")
-MakeDir("!"+toolName+" Specific Files")
-# ./Project/Design Files/Tool Specyfic Files
-os.chdir(os.getcwd()+slash+"!"+toolName+" Specific Files")
-MakeDir(toolName+" Integrated Library")
-# ./Project/Design Files/Tool Specyfic Files/Tool Integrated Library
-os.chdir(os.getcwd()+slash+toolName+" Integrated Library")
-integratedLibrary = \
+fileContent.append(projectNameReadMe)
+
+edaToolIntegratedLibrary = \
 """Place for """+toolName+""" Library files
 """
-SaveTxtFile(integratedLibrary)
-MakeDir("3D models")
-# ./Project/Design Files/Tool Specyfic Files/Tool Integrated Library/3D models
-os.chdir("."+slash+"3D models")
+fileContent.append(edaToolIntegratedLibrary)
+
 model3D = \
 """Place STEP files of 3D models here.
 """
-SaveTxtFile(model3D)
-# ./Project/Design Files/
-os.chdir('..'+slash+'..')
-MakeDir(toolName+" Templates")
-# ./Project/Design Files/Tool Specyfic Files/Tool Templates
-os.chdir("."+slash+toolName+" Templates")
-templates = \
+fileContent.append(model3D)
+
+edaToolTemplates = \
 """Place for """+toolName+""" templates, e.g for BOMs
 """
-SaveTxtFile(templates)
-# ./Project/Design Files
-os.chdir('..'+slash+'..')
-MakeDir(clientName)
-# ./Project/Design Files/Client Name
-os.chdir(os.getcwd()+slash+clientName)
-MakeDir(projectName)
-# ./Project/Design Files/Client Name/Project Name
-os.chdir(os.getcwd()+slash+projectName)
-project = \
+fileContent.append(edaToolTemplates)
+
+designFilesProjectName = \
 """Examples of other directory names:
 V1I1A - only BOM changes
 V1I2 - pin compatible with V1I1, no big changes
@@ -118,7 +198,12 @@ This is also place for backups. Pack V1I1 Directory, add date and possibly a not
 V1I1 2011 01 10
 V1I1 2011 02 21 Schematic Checked
 """
-SaveTxtFile(project)
+fileContent.append(designFilesProjectName)
+
+backupInfo = \
+"""Directory where BackMeUp.py is saving backups.
+"""
+fileContent.append(backupInfo)
 
 backMeUpScript = \
 """__version__ = '1.3'
@@ -182,39 +267,25 @@ print "Press any key to continue..."
 raw_input()
 
 """
-SaveTxtFile(backMeUpScript, True, "BackMeUp.py")
-open("backupInfo.txt", 'a').close()
+fileContent.append(backMeUpScript)
 
-MakeDir("Docs")
-# ./Project/Design Files/Client Name/Project Name/Docs
-os.chdir(os.getcwd()+slash+"Docs")
 docs = \
 """Copy all created documents (doc, xls, pdf) directly here, or create new subfolders e.g. Manual, ...
 """
-SaveTxtFile(docs)
-# ./Project/Design Files/Client Name/Project Name/
-os.chdir('..')
-MakeDir("V1I1")
-# ./Project/Design Files/Client Name/Project Name/V1I1
-os.chdir(os.getcwd()+slash+"V1I1")
-vi = \
+fileContent.append(docs)
+
+viIi = \
 """Place here """+toolName+""" Design Files
 After release, keep record about any required changes in TODO directory.
 """
-SaveTxtFile(vi)
-MakeDir("Firmware")
-# ./Project/Design Files/Client Name/Project Name/V1I1/Firmware
-os.chdir(os.getcwd()+slash+"Firmware")
-fw = \
+fileContent.append(viIi)
+
+viIiFw = \
 """All the files needed for CPLD, EEPROMs, uController, BIOS, ...
 """
-SaveTxtFile(fw)
-# ./Project/Design Files/Client Name/Project Name/V1I1
-os.chdir('..')
-MakeDir("TODO")
-# ./Project/Design Files/Client Name/Project Name/V1I1/TODO
-os.chdir(os.getcwd()+slash+"TODO")
-todo = \
+fileContent.append(viIiFw)
+
+viIiTodo = \
 """Here describe all the things which have to be improved or done in the next revision.
 
 Schematic:
@@ -228,31 +299,13 @@ Production:
 
 Firmware:
 """
-SaveTxtFile(todo, "TODO.txt")
-    
-# ./Project/Design Files/Client Name/Project Name/
-os.chdir('..'+slash+'..')
-MakeDir("VxIx")
+fileContent.append(viIiTodo)
 
-# ./Project/Design Files/Client Name/Project Name/VxIx
-os.chdir(os.getcwd()+slash+"VxIx")
-SaveTxtFile(vi)
-MakeDir("Firmware")
-# ./Project/Design Files/Client Name/Project Name/VxIx/Firmware
-os.chdir(os.getcwd()+slash+"Firmware")
-SaveTxtFile(fw)
-# ./Project/Design Files/Client Name/Project Name/VxIx
-os.chdir('..')
-MakeDir("TODO")
-# ./Project/Design Files/Client Name/Project Name/VxIx/TODO
-os.chdir(os.getcwd()+slash+"TODO")
-SaveTxtFile(todo, "TODO.txt")
+#For VxIx
+fileContent.append(viIi)
+fileContent.append(viIiFw)
+fileContent.append(viIiTodo)
 
-# ./Project/
-os.chdir('..'+slash+'..'+slash+'..'+slash+'..'+slash+'..')
-MakeDir("Released Files")
-# ./Project/Released Files
-os.chdir(os.getcwd()+slash+"Released Files")
 releaseWrn = \
 """ONCE RELEASED: 
 - NEVER EVER CHAGE THE FILES IN THESE DIRECTORIES!
@@ -261,36 +314,24 @@ releaseWrn = \
 WHEN YOU START A NEW BOARD ISSUE, ALWAYS COPY AND USE FILES FROM THESE RELEASE DIRECTORIES AS STARTING POINT 
 AND THEN READ TODO file at!
 """
-SaveTxtFile(releaseWrn, "IMPORTANT READ ME.txt")
-MakeDir(clientName)
-# ./Project/Released Files/Client Name
-os.chdir(os.getcwd()+slash+clientName)
-MakeDir(projectName)
-# ./Project/Released Files/Client Name/Project Name
-os.chdir(os.getcwd()+slash+projectName)
-infoo = \
+fileContent.append(releaseWrn)
+
+info = \
 """Use same naming for folders as in ! """+toolName+""" Source Files
 """
-SaveTxtFile(infoo)
-MakeDir("V1I1")
-# ./Project/Released Files/Client Name/Project Name/V1I1
-os.chdir(os.getcwd()+slash+"V1I1")
-MakeDir("3D")
-# ./Project/Released Files/Client Name/Project Name/V1I1/3D
-os.chdir(os.getcwd()+slash+"3D")
-info3D = \
+fileContent.append(info)
+
+## RELEASE for V1I1
+releasedModel3D = \
 """Place following files here:
 
 3D step file
 3D pdf
+
 """
-SaveTxtFile(info3D)
-# ./Project/Released Files/Client Name/Project Name/V1I1/
-os.chdir('..')
-MakeDir("Board Assembly")
-# ./Project/Released Files/Client Name/Project Name/V1I1/Board Assembly
-os.chdir(os.getcwd()+slash+"Board Assembly")
-brdAss = \
+fileContent.append(releasedModel3D)
+
+releasedBrdAsm = \
 """Place following files here:
 
 - Mechanical Drawing (Board dimensions, holes position, ..)
@@ -304,89 +345,28 @@ brdAss = \
 - PDF 3D Model
 
 """
-SaveTxtFile(brdAss)
-# ./Project/Released Files/Client Name/Project Name/V1I1/
-os.chdir('..')
-vInfo = \
-"""Follow this procedure before releasing files. Confirm every action with your initials and date.
-IF ANY CHANGES NEEDS TO BE DONE, START THE PROCEDURE FROM BEGINNING!
+fileContent.append(releasedBrdAsm)
 
-The procedure needs to be executed in order as defined here. Start from number 1
-
-REMARK: this instruction is dedicated to Altium Designer. If you are using different EDA, you have to use corresponding functionalities available in your program.
---------------------------------------------------------------------------------
-
-
-1) Right Click on the project -> Compile PCB project
-I confirm, the project compiles with no errors: 
-YourIntials [DAY-MONTH-YEAR]
-
-2) Run Design -> Update PCB Document
-I confirm, there are no differences between Schematic and PCB: 
-YourIntials [DAY-MONTH-YEAR]
-
-
-3) Impedance
-I confirm, I have updated and check track width/gap to match required impedance (e.g 55 OHMs): 
-YourIntials [DAY-MONTH-YEAR]
-
-
-4) Polygon Action -> Repour All
-I confirm, all polygons have been repoured: 
-YourIntials [DAY-MONTH-YEAR]
-
-
-5) Run Tools -> Design Rule Check -> Run Design Rule Check
-I confirm, I have checked Design Rule Output File:
-YourIntials [DAY-MONTH-YEAR]
-
-
-6) Gerber check
-I confirm, I have copied and visually checked gerber files placed in \PCB Manufacturing\Gerber Output\
-YourIntials [DAY-MONTH-YEAR]
-
-
-7) Other files
-I confirm, I have copied and checked files placed in subdirectories:
-YourIntials [DAY-MONTH-YEAR]
-"""
-SaveTxtFile(todo, "!!! IMPORTANT !!! Release Document for "+toolName+".txt")
-MakeDir("Firmware")
-# ./Project/Released Files/Client Name/Project Name/V1I1/Firmware
-os.chdir(os.getcwd()+slash+"Firmware")
-frm = \
+releasedFrm = \
 """All the files needed for CPLD, EEPROMs, uController, BIOS, ...
 
 Start file name with component designator - the one where the file needs to be stored e.g:
 U5 - AMI BIOS 0ABVQ018
 U15 - Ethernet EEPROM 82574 
 """
-SaveTxtFile(frm)
-# ./Project/Released Files/Client Name/Project Name/V1I1/
-os.chdir('..')
-MakeDir("PCB Manufacturing")
-# ./Project/Released Files/Client Name/Project Name/V1I1/PCB Manufacturing
-os.chdir(os.getcwd()+slash+"PCB Manufacturing")
-pcbMan = """Place PCB stackup information here."""
-SaveTxtFile(pcbMan)
-MakeDir("Gerber Output")
-# ./Project/Released Files/Client Name/Project Name/V1I1/PCB Manufacturing/Gerber Output
-os.chdir(os.getcwd()+slash+"Gerber Output")
-gerOut = """Place here gerber files."""
-SaveTxtFile(gerOut)
-# ./Project/Released Files/Client Name/Project Name/V1I1/PCB Manufacturing/
-os.chdir('..')
-MakeDir("NC Drill Output")
-# ./Project/Released Files/Client Name/Project Name/V1I1/PCB Manufacturing/NC Drill Output
-os.chdir(os.getcwd()+slash+"NC Drill Output")
-drill = """Place here drill files and documents which explain it (e.g. for HDI PCB you can put here pdf showing drills for each layer pair)"""
-SaveTxtFile(drill)
-# ./Project/Released Files/Client Name/Project Name/V1I1/PCB Manufacturing/
-os.chdir('..')
-MakeDir("Layers with Highlighted Differential Pairs")
-# ./Project/Released Files/Client Name/Project Name/V1I1/PCB Manufacturing/Layers with Highlighted Differential Pairs
-os.chdir(os.getcwd()+slash+"Layers with Highlighted Differential Pairs")
-diffPair = \
+fileContent.append(releasedFrm)
+
+releasedPcbManufacturing = \
+"""Place PCB stackup information here.
+"""
+fileContent.append(releasedPcbManufacturing)
+
+releasedGerberOut = \
+"""Place here gerber files.
+"""
+fileContent.append(releasedGerberOut)
+
+releasedDiffLayers = \
 """Highlight differential pairs and Take screenshots of each layer. Examples of naming screenshots:
 
 DIFF100-L1.jpg
@@ -396,197 +376,90 @@ DIFF90-L1.jpg
 
 Why? If manufacturer can not find a particular DIFF pair on one of the layers, they will contact you. 
 By providing them these screenshots, they can check it by themselves.
+
 """
-SaveTxtFile(diffPair)
-# ./Project/Released Files/Client Name/Project Name/V1I1/
-os.chdir('..'+slash+'..')
-MakeDir("Source Files")
-# ./Project/Released Files/Client Name/Project Name/V1I1/Source Files
-os.chdir(os.getcwd()+slash+"Source Files")
-srcFile = \
-"""Place here zip file of source files, e.g copy and pack here directory from: ! "+toolName+"\\Source Files\\"+clientName+"\\"+projectName+"\\V1I1
+fileContent.append(releasedDiffLayers)
+
+releasedDrill = \
+"""Place here drill files and documents which explain it (e.g. for HDI PCB you can put here pdf showing drills for each layer pair)
 """
-SaveTxtFile(srcFile)
-# ./Project/Released Files/Client Name/Project Name/V1I1/
-os.chdir('..')
-MakeDir("Schematic")
-# ./Project/Released Files/Client Name/Project Name/V1I1/Schematic
-os.chdir(os.getcwd()+slash+"Schematic")
-schFile = \
+fileContent.append(releasedDrill)
+
+releasedSch = \
 """Update Schematic Cover Page to RELEASED DD-MMM-YYYY
 Place here PDF version of schematic, if possible one for each BOM variant.
 """
-SaveTxtFile(schFile)
-# ./Project/Released Files/Client Name/Project Name/
-os.chdir('..'+slash+'..')
-MakeDir("VxIx")
-#####################
-# ./Project/Released Files/Client Name/Project Name/VxIx
-os.chdir(os.getcwd()+slash+"VxIx")
-MakeDir("3D")
-# ./Project/Released Files/Client Name/Project Name/VxIx/3D
-os.chdir(os.getcwd()+slash+"3D")
-SaveTxtFile(info3D)
-# ./Project/Released Files/Client Name/Project Name/VxIx/
-os.chdir('..')
-MakeDir("Board Assembly")
-# ./Project/Released Files/Client Name/Project Name/VxIx/Board Assembly
-os.chdir(os.getcwd()+slash+"Board Assembly")
-SaveTxtFile(brdAss)
-# ./Project/Released Files/Client Name/Project Name/VxIx/
-os.chdir('..')
-SaveTxtFile(todo, "!!! IMPORTANT !!! Release Document for "+toolName+".txt")
-MakeDir("Firmware")
-# ./Project/Released Files/Client Name/Project Name/VxIx/Firmware
-os.chdir(os.getcwd()+slash+"Firmware")
-SaveTxtFile(frm)
-# ./Project/Released Files/Client Name/Project Name/VxIx/
-os.chdir('..')
-MakeDir("PCB Manufacturing")
-# ./Project/Released Files/Client Name/Project Name/VxIx/PCB Manufacturing
-os.chdir(os.getcwd()+slash+"PCB Manufacturing")
-SaveTxtFile(pcbMan)
-MakeDir("Gerber Output")
-# ./Project/Released Files/Client Name/Project Name/VxIx/PCB Manufacturing/Gerber Output
-os.chdir(os.getcwd()+slash+"Gerber Output")
-SaveTxtFile(gerOut)
-# ./Project/Released Files/Client Name/Project Name/VxIx/PCB Manufacturing/
-os.chdir('..')
-MakeDir("NC Drill Output")
-# ./Project/Released Files/Client Name/Project Name/VxIx/PCB Manufacturing/NC Drill Output
-os.chdir(os.getcwd()+slash+"NC Drill Output")
-SaveTxtFile(drill)
-# ./Project/Released Files/Client Name/Project Name/VxIx/PCB Manufacturing/
-os.chdir('..')
-MakeDir("Layers with Highlighted Differential Pairs")
-# ./Project/Released Files/Client Name/Project Name/VxIx/PCB Manufacturing/Layers with Highlighted Differential Pairs
-os.chdir(os.getcwd()+slash+"Layers with Highlighted Differential Pairs")
-SaveTxtFile(diffPair)
-# ./Project/Released Files/Client Name/Project Name/VxIx/
-os.chdir('..'+slash+'..')
-MakeDir("Source Files")
-# ./Project/Released Files/Client Name/Project Name/VxIx/Source Files
-os.chdir(os.getcwd()+slash+"Source Files")
-SaveTxtFile(srcFile)
-# ./Project/Released Files/Client Name/Project Name/VxIx/
-os.chdir('..')
-MakeDir("Schematic")
-# ./Project/Released Files/Client Name/Project Name/VxIx/Schematic
-os.chdir(os.getcwd()+slash+"Schematic")
-SaveTxtFile(schFile)
-# ./Project/
-os.chdir('..'+slash+'..'+slash+'..'+slash+'..'+slash+'..')
-print os.getcwd()
-MakeDir("Work")
-# ./Project/Work
-os.chdir(os.getcwd()+slash+"Work")
-MakeDir(clientName)
-# ./Project/Work/Client Name
-os.chdir(os.getcwd()+slash+clientName)
-MakeDir(projectName)
-# ./Project/Work/Client Name/Project Name
-os.chdir(os.getcwd()+slash+projectName)
-MakeDir("V1I1")
-# ./Project/Work/Client Name/Project Name/V1I1
-os.chdir(os.getcwd()+slash+"V1I1")
-MakeDir("Competition and Similar Products")
-# ./Project/Work/Client Name/Project Name/V1I1/Competition and Similar Products
-os.chdir(os.getcwd()+slash+"Competition and Similar Products")
-competition = \
+fileContent.append(releasedSch)
+
+releasedSrc = \
+"""Place here zip file of source files, e.g copy and pack here directory from:\n"""+\
+"."+slash+projectName+clientName+slash+"Design Files"+slash+clientName+slash+\
+projectName+slash+"VxIx"+slash+\
+"\nwhere VxIx is the latest project version ready to release."
+fileContent.append(releasedSrc)
+## RELEASE for VxIx
+fileContent.append(releasedModel3D)
+fileContent.append(releasedBrdAsm)
+fileContent.append(releasedFrm)
+fileContent.append(releasedPcbManufacturing)
+fileContent.append(releasedGerberOut)
+fileContent.append(releasedDiffLayers)
+fileContent.append(releasedDrill)
+fileContent.append(releasedSch)
+fileContent.append(releasedSrc)
+
+## WORK for V1I1
+similarProducts = \
 """Create a directory with Competition Company name and place all documents about their similar produtcs there.
 """
-SaveTxtFile(competition)
-# ./Project/Work/Client Name/Project Name/V1I1/
-os.chdir('..')
-MakeDir("Datasheets")
-# ./Project/Work/Client Name/Project Name/V1I1/Datasheets
-os.chdir(os.getcwd()+slash+"Datasheets")
-ds = \
+fileContent.append(similarProducts)
+
+datasheets = \
 """For components with one datasheet only, these can be place directly here.
 
 For components with more then one datasheet, create a directory, e.g:
 Intel
-Ethernet.
+Ethernet
 """
-SaveTxtFile(ds)
-# ./Project/Work/Client Name/Project Name/V1I1/
-os.chdir('..')
-MakeDir("Design Guides")
-# ./Project/Work/Client Name/Project Name/V1I1/Design Guides
-os.chdir(os.getcwd()+slash+"Design Guides")
-guides = \
+fileContent.append(datasheets)
+
+designGuides = \
 """Place all design guide, schematic / layout check documents, length & power calculators here.
 """
-SaveTxtFile(guides)
-# ./Project/Work/Client Name/Project Name/V1I1/
-os.chdir('..')
-MakeDir("Development Boards")
-# ./Project/Work/Client Name/Project Name/V1I1/Development Boards
-os.chdir(os.getcwd()+slash+"Development Boards")
-devBrd = \
+fileContent.append(designGuides)
+
+devBrds = \
 """Create a directory with Board name and copy there all the files from manufacturer.
 """
-SaveTxtFile(devBrd)
-# ./Project/Work/Client Name/Project Name/V1I1/
-os.chdir('..')
-MakeDir("Errata")
-# ./Project/Work/Client Name/Project Name/V1I1/Errata
-os.chdir(os.getcwd()+slash+"Errata")
-errata = """Place all the errate files here."""
-SaveTxtFile(errata)
-# ./Project/Work/Client Name/Project Name/V1I1/
-os.chdir('..')
-MakeDir("Software")
-# ./Project/Work/Client Name/Project Name/V1I1/Software
-os.chdir(os.getcwd()+slash+"Software")
-sw = \
+fileContent.append(devBrds)
+
+errata = \
+"""Place all the errate files here.
+"""
+fileContent.append(errata)
+
+software = \
 """Place here all software related files: Apllications, Drivers, Tools, ...
 """
-SaveTxtFile(sw)
-# ./Project/Work/Client Name/Project Name/
-os.chdir('..'+slash+'..')
-MakeDir("VxIx")
-# ./Project/Work/Client Name/Project Name/VxIx
-os.chdir(os.getcwd()+slash+"VxIx")
-MakeDir("Competition and Similar Products")
-# ./Project/Work/Client Name/Project Name/VxIx/Competition and Similar Products
-os.chdir(os.getcwd()+slash+"Competition and Similar Products")
-SaveTxtFile(competition)
-# ./Project/Work/Client Name/Project Name/VxIx/
-os.chdir('..')
-MakeDir("Datasheets")
-# ./Project/Work/Client Name/Project Name/VxIx/Datasheets
-os.chdir(os.getcwd()+slash+"Datasheets")
-SaveTxtFile(ds)
-# ./Project/Work/Client Name/Project Name/VxIx/
-os.chdir('..')
-MakeDir("Design Guides")
-# ./Project/Work/Client Name/Project Name/VxIx/Design Guides
-os.chdir(os.getcwd()+slash+"Design Guides")
-SaveTxtFile(guides)
-# ./Project/Work/Client Name/Project Name/VxIx/
-os.chdir('..')
-MakeDir("Development Boards")
-# ./Project/Work/Client Name/Project Name/VxIx/Development Boards
-os.chdir(os.getcwd()+slash+"Development Boards")
-SaveTxtFile(devBrd)
-# ./Project/Work/Client Name/Project Name/VxIx/
-os.chdir('..')
-MakeDir("Errata")
-# ./Project/Work/Client Name/Project Name/VxIx/Errata
-os.chdir(os.getcwd()+slash+"Errata")
-SaveTxtFile(errata)
-# ./Project/Work/Client Name/Project Name/VxIx/
-os.chdir('..')
-MakeDir("Software")
-# ./Project/Work/Client Name/Project Name/VxIx/Software
-os.chdir(os.getcwd()+slash+"Software")
-SaveTxtFile(sw)
-# ./Project/Work/Client Name/Project Name/
-if projectNameAsRootDir:
-    os.chdir('..'+slash+'..'+slash+'..'+slash+'..'+slash+'..'+slash+'..')
-else:
-    os.chdir('..'+slash+'..'+slash+'..'+slash+'..'+slash+'..')
+fileContent.append(software)
+## WORK for VxIx
+fileContent.append(similarProducts)
+fileContent.append(datasheets)
+fileContent.append(designGuides)
+fileContent.append(devBrds)
+fileContent.append(errata)
+fileContent.append(software)
+
+##
+## MAIN
+##
+
+dirTemplate = __ReadFile(dirTemplateFilename)
+structure   = ParseDirTemplate(dirTemplate)
+PersonalizeProject(structure)
+CreatePaths(structure)
+FillTextFiles(fileContainer, fileContent)
+
 
 pdfSource = """JVBERi0xLjQKJcfsj6IKNSAwIG9iago8PC9MZW5ndGggNiAwIFIvRmlsdGVyIC9GbGF0ZURlY29k
 ZT4+CnN0cmVhbQp4nLVdW69lR3EWBIxzgvCMAYOdBDa5cYbkbPp+eY2SlygvIEt5gDw5MSgaE5n/
@@ -6747,9 +6620,12 @@ NDU5OTggMDAwMDAgbiAKdHJhaWxlcgo8PCAvU2l6ZSAxMzMgL1Jvb3QgMSAwIFIgL0luZm8gMiAw
 IFIKL0lEIFs8RjA2RUJFQkU2ODJDN0E3MTVBNTA4ODBBMDcxOTg0MkY+PEYwNkVCRUJFNjgyQzdB
 NzE1QTUwODgwQTA3MTk4NDJGPl0KPj4Kc3RhcnR4cmVmCjM0ODE3OQolJUVPRgo=
 """
-if projectNameAsRootDir:
-    os.chdir("."+slash+projectName)
+
+os.chdir("."+slash+projectName)
 if not os.path.exists("Directory_Template_Manual.pdf"):
     with open("Directory_Template_Manual.pdf", "wb") as text_file:
         text_file.write(pdfSource.decode('base64', 'strict'))
+
+
+
 
