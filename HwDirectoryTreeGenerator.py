@@ -13,11 +13,11 @@ elif _platform == "win32":
     slash = '\\'
 
 # Project client name.
-clientName = '_ClientName'
+clientName = 'Exploding Capacitors Lab'
 
 # If 'projectName' will be empty, script will fetch current directory
 # name and uses it as project name.
-projectName = '_ProjectName'
+projectName = 'poorDuino'
 
 if not projectName:
     projectName = os.path.relpath(".","..")
@@ -25,7 +25,7 @@ if not projectName:
 # Most work will be done with KiCAD EDA so it will be default value of
 # 'toolName'. If you are using different software, please put its name
 # here.
-toolName = '_EDAToolName'
+toolName = 'EAGLE'
 
 dirTemplateFilename = "DirectoryTemplate.txt"
 fileContainer = []
@@ -206,7 +206,7 @@ backupInfo = \
 fileContent.append(backupInfo)
 
 backMeUpScript = \
-"""__version__ = '1.3'
+"""__version__ = '1.4'
 import os
 import zipfile
 import time
@@ -223,7 +223,7 @@ if _platform == "linux" or _platform == "linux2":
     slash = "/"
 elif _platform == "win32":
    # Windows
-    slash = "\\\\"
+    slash = "\\"
     
 ## Put brief description about what have been done in
 ## this revision in backupInfo.txt and/or update TODO
@@ -240,12 +240,13 @@ with open(backupInfoFile, 'rb+') as f:
 if backupInfo:
     if not os.path.exists("Backup"):
         os.makedirs("Backup")
+    prjName = os.path.basename(os.getcwd())
     timestamp = time.time()
-    zfTimestamp  = \\
+    zfTimestamp  = \
     datetime.datetime.fromtimestamp(timestamp).strftime("%Y%m%d_%H%M%S")
-    bckTimestamp = \\
+    bckTimestamp = \
     datetime.datetime.fromtimestamp(timestamp).strftime("%H:%M:%S %d.%m.%Y")
-    zfName = zfTimestamp+'_'+revision+'.zip'
+    zfName = prjName+'_'+revision+'_'+zfTimestamp+'.zip'
     os.chdir("."+slash+"Backup")
     zf = zipfile.ZipFile(zfName, "w")
     os.chdir("..")
@@ -254,17 +255,18 @@ if backupInfo:
         for filename in files:
             zf.write(os.path.join(dirname, filename))
     with open(backupInfoFile, "a") as f:
-        f.write("\\n\\nTimestamp: "+bckTimestamp)
+        f.write("\n\nTimestamp: "+bckTimestamp)
     zf.write(backupInfoFile)
     zf.close()
     open(backupInfoFile, 'w').close()
     print "Backup is done. Zip file:", zfName
 else:
-    print "Backup info is empty! \\
-    \\nPlease add description to backupInfo.txt and re-run this script again!"
+    print "Backup info is empty! \
+    \nPlease add description to backupInfo.txt and re-run this script again!"
 
 print "Press any key to continue..."
 raw_input()
+
 
 """
 fileContent.append(backMeUpScript)

@@ -1,14 +1,4 @@
-################################################################
-## IMPORTANT! If you modify this file, please copy&paste it    #
-## to variable 'backMeUpScript' in HwDirectoryTreeGenerator.py.#
-## Without this step any changes WILL NOT BE PRESENT!          #
-##                                                             #
-## NOTE: to keep desired behaviour in target script you have   #
-## to pay attention and double all backslashes ('\\' instead   #
-## of '\') before you copy this script to dedicated variable!  #
-## Also keep version updated to easy changes tracking.         #
-################################################################
-__version__ = '1.3'
+__version__ = '1.4'
 import os
 import zipfile
 import time
@@ -42,12 +32,13 @@ with open(backupInfoFile, 'rb+') as f:
 if backupInfo:
     if not os.path.exists("Backup"):
         os.makedirs("Backup")
+    prjName = os.path.basename(os.getcwd())
     timestamp = time.time()
     zfTimestamp  = \
     datetime.datetime.fromtimestamp(timestamp).strftime("%Y%m%d_%H%M%S")
     bckTimestamp = \
     datetime.datetime.fromtimestamp(timestamp).strftime("%H:%M:%S %d.%m.%Y")
-    zfName = zfTimestamp+'_'+revision+'.zip'
+    zfName = prjName+'_'+revision+'_'+zfTimestamp+'.zip'
     os.chdir("."+slash+"Backup")
     zf = zipfile.ZipFile(zfName, "w")
     os.chdir("..")
@@ -67,3 +58,4 @@ else:
 
 print "Press any key to continue..."
 raw_input()
+
