@@ -1,4 +1,4 @@
-__version__ = '2.2'
+__version__ = '2.3'
 import os
 import errno
 from sys import platform as _platform
@@ -17,7 +17,7 @@ clientName = 'Exploding Capacitors Lab'
 
 # If 'projectName' will be empty, script will fetch current directory
 # name and uses it as project name.
-projectName = 'poorDuino'
+projectName = 'PutProjectNameHere'
 
 if not projectName:
     projectName = os.path.relpath(".","..")
@@ -25,9 +25,12 @@ if not projectName:
 # Most work will be done with KiCAD EDA so it will be default value of
 # 'toolName'. If you are using different software, please put its name
 # here.
-toolName = 'EAGLE'
+toolName = 'KiCAD'
 
-dirTemplateFilename = "DirectoryTemplate.txt"
+# If you are inexperianced script user, please use DirectoryTemplate.txt
+# Basic version is short of all readme files. 
+dirTemplateFilename = "DirectoryTemplateBasic.txt"
+#dirTemplateFilename = "DirectoryTemplate.txt"
 fileContainer = []
 fileContent   = []
 
@@ -6624,9 +6627,10 @@ NzE1QTUwODgwQTA3MTk4NDJGPl0KPj4Kc3RhcnR4cmVmCjM0ODE3OQolJUVPRgo=
 """
 
 os.chdir("."+slash+projectName)
-if not os.path.exists("Directory_Template_Manual.pdf"):
-    with open("Directory_Template_Manual.pdf", "wb") as text_file:
-        text_file.write(pdfSource.decode('base64', 'strict'))
+if dirTemplateFilename is "DirectoryTemplate.txt":
+    if not os.path.exists("Directory_Template_Manual.pdf"):
+        with open("Directory_Template_Manual.pdf", "wb") as text_file:
+	    text_file.write(pdfSource.decode('base64', 'strict'))
 
 
 
