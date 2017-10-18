@@ -17,7 +17,7 @@ clientName = 'Exploding Capacitors Lab'
 
 # If 'projectName' will be empty, script will fetch current directory
 # name and uses it as project name.
-projectName = 'PutProjectNameHere'
+projectName = 'ProjectName'
 
 if not projectName:
     projectName = os.path.relpath(".","..")
@@ -34,6 +34,9 @@ dirTemplateFilename = "DirectoryTemplateBasic.txt"
 fileContainer = []
 fileContent   = []
 
+# If you do not want to keep directory structure in GIT, set this flag to FALSE
+keepDirTreeInGit = True
+ 
 def __CreateDir(dirName):
     try:
         os.makedirs(dirName)
@@ -42,6 +45,7 @@ def __CreateDir(dirName):
             raise
         else:
             pass
+
 
 def __ReadFile(filename):
     with open(filename, "r") as textFile:
@@ -99,6 +103,12 @@ def __UpdatePath(oldPath, depthLevel):
         result += elem+slash
     return result
 
+def __AddGitKeeper(path):
+    cwd = os.getcwd()
+    os.chdir(path)
+    open(".keepdir", 'a').close()
+    os.chdir(cwd)
+
 def CreatePaths(structure):
     lastDepth     = -1
     lastMode      = ""
@@ -114,6 +124,8 @@ def CreatePaths(structure):
             lastPath  = rootPath+structure[idx][2]
             lastDir   = structure[idx][2]
             __CreateDir(lastPath)
+            if keepDirTreeInGit is True:
+                __AddGitKeeper(lastPath)
         elif structure[idx][0] == "dir":
             if lastMode == "root" and lastDepth < structure[idx][1]:
                 lastMode  = structure[idx][0]
@@ -121,18 +133,24 @@ def CreatePaths(structure):
                 lastPath  = lastPath+slash+structure[idx][2]
                 lastDir   = structure[idx][2]
                 __CreateDir(lastPath)
+                if keepDirTreeInGit is True:
+                    __AddGitKeeper(lastPath)
             elif lastMode == "dir" and lastDepth < structure[idx][1]:
                 lastMode  = structure[idx][0]
                 lastDepth = structure[idx][1]
                 lastPath  = lastPath+slash+structure[idx][2]
                 lastDir   = structure[idx][2]
                 __CreateDir(lastPath)
+                if keepDirTreeInGit is True:
+                    __AddGitKeeper(lastPath)
             elif lastMode == "dir" and lastDepth == structure[idx][1]:
                 lastMode  = structure[idx][0]
                 lastDepth = structure[idx][1]
                 lastPath  = __UpdatePath(lastPath, 1)+structure[idx][2]
                 lastDir   = structure[idx][2]
                 __CreateDir(lastPath)
+                if keepDirTreeInGit is True:
+                    __AddGitKeeper(lastPath)
             elif lastMode == "dir" and lastDepth > structure[idx][1]:
                 lastMode  = structure[idx][0]
                 depthDiff = lastDepth - structure[idx][1]
@@ -140,7 +158,9 @@ def CreatePaths(structure):
                 newPath   = __UpdatePath(str(lastPath), depthDiff+1)+structure[idx][2]
                 lastPath  = newPath
                 lastDir   = structure[idx][2]
-                __CreateDir(lastPath)             
+                __CreateDir(lastPath)
+                if keepDirTreeInGit is True:
+                    __AddGitKeeper(lastPath)
             else:
                 print "Error!"         
         elif structure[idx][0] == "file":
@@ -6631,7 +6651,5 @@ if dirTemplateFilename is "DirectoryTemplate.txt":
     if not os.path.exists("Directory_Template_Manual.pdf"):
         with open("Directory_Template_Manual.pdf", "wb") as text_file:
 	    text_file.write(pdfSource.decode('base64', 'strict'))
-
-
 
 
