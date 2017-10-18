@@ -1,8 +1,9 @@
-__version__ = '2.3'
+__version__ = '2.4'
 import os
 import errno
 from sys import platform as _platform
 import re
+import config as cfg
 
 # Backslash alignment between different OSes
 if _platform == "linux" or _platform == "linux2":
@@ -12,30 +13,11 @@ elif _platform == "win32":
    # Windows
     slash = '\\'
 
-# Project client name.
-clientName = 'Exploding Capacitors Lab'
-
-# If 'projectName' will be empty, script will fetch current directory
-# name and uses it as project name.
-projectName = 'ProjectName'
-
-if not projectName:
-    projectName = os.path.relpath(".","..")
+if not cfg.projectName:
+    cfg.projectName = os.path.relpath(".","..")
     
-# Most work will be done with KiCAD EDA so it will be default value of
-# 'toolName'. If you are using different software, please put its name
-# here.
-toolName = 'KiCAD'
-
-# If you are inexperianced script user, please use DirectoryTemplate.txt
-# Basic version is short of all readme files. 
-dirTemplateFilename = "DirectoryTemplateBasic.txt"
-#dirTemplateFilename = "DirectoryTemplate.txt"
 fileContainer = []
 fileContent   = []
-
-# If you do not want to keep directory structure in GIT, set this flag to FALSE
-keepDirTreeInGit = True
  
 def __CreateDir(dirName):
     try:
@@ -45,7 +27,6 @@ def __CreateDir(dirName):
             raise
         else:
             pass
-
 
 def __ReadFile(filename):
     with open(filename, "r") as textFile:
@@ -124,7 +105,7 @@ def CreatePaths(structure):
             lastPath  = rootPath+structure[idx][2]
             lastDir   = structure[idx][2]
             __CreateDir(lastPath)
-            if keepDirTreeInGit is True:
+            if cfg.keepDirTreeInGit is True:
                 __AddGitKeeper(lastPath)
         elif structure[idx][0] == "dir":
             if lastMode == "root" and lastDepth < structure[idx][1]:
@@ -133,7 +114,7 @@ def CreatePaths(structure):
                 lastPath  = lastPath+slash+structure[idx][2]
                 lastDir   = structure[idx][2]
                 __CreateDir(lastPath)
-                if keepDirTreeInGit is True:
+                if cfg.keepDirTreeInGit is True:
                     __AddGitKeeper(lastPath)
             elif lastMode == "dir" and lastDepth < structure[idx][1]:
                 lastMode  = structure[idx][0]
@@ -141,7 +122,7 @@ def CreatePaths(structure):
                 lastPath  = lastPath+slash+structure[idx][2]
                 lastDir   = structure[idx][2]
                 __CreateDir(lastPath)
-                if keepDirTreeInGit is True:
+                if cfg.keepDirTreeInGit is True:
                     __AddGitKeeper(lastPath)
             elif lastMode == "dir" and lastDepth == structure[idx][1]:
                 lastMode  = structure[idx][0]
@@ -149,7 +130,7 @@ def CreatePaths(structure):
                 lastPath  = __UpdatePath(lastPath, 1)+structure[idx][2]
                 lastDir   = structure[idx][2]
                 __CreateDir(lastPath)
-                if keepDirTreeInGit is True:
+                if cfg.keepDirTreeInGit is True:
                     __AddGitKeeper(lastPath)
             elif lastMode == "dir" and lastDepth > structure[idx][1]:
                 lastMode  = structure[idx][0]
@@ -159,7 +140,7 @@ def CreatePaths(structure):
                 lastPath  = newPath
                 lastDir   = structure[idx][2]
                 __CreateDir(lastPath)
-                if keepDirTreeInGit is True:
+                if cfg.keepDirTreeInGit is True:
                     __AddGitKeeper(lastPath)
             else:
                 print "Error!"         
@@ -176,11 +157,11 @@ def CreatePaths(structure):
 def PersonalizeProject(structure):
     for idx, line in enumerate(structure):
         if structure[idx][2] == "_ProjectName":
-            structure[idx][2] = projectName
+            structure[idx][2] = cfg.projectName
         if structure[idx][2] == "_ClientName":
-            structure[idx][2] = clientName
+            structure[idx][2] = cfg.clientName
         if structure[idx][2].find("EDATool"):
-            structure[idx][2] = structure[idx][2].replace("EDATool", toolName)
+            structure[idx][2] = structure[idx][2].replace("EDATool", cfg.toolName)
 
 def FillTextFiles(fContainer, fContent):
     for idx, path in enumerate(fContainer):
@@ -196,7 +177,7 @@ Work - place this directory on your computer.
 fileContent.append(projectNameReadMe)
 
 edaToolIntegratedLibrary = \
-"""Place for """+toolName+""" Library files
+"""Place for """+cfg.toolName+""" Library files
 """
 fileContent.append(edaToolIntegratedLibrary)
 
@@ -206,7 +187,7 @@ model3D = \
 fileContent.append(model3D)
 
 edaToolTemplates = \
-"""Place for """+toolName+""" templates, e.g for BOMs
+"""Place for """+cfg.toolName+""" templates, e.g for BOMs
 """
 fileContent.append(edaToolTemplates)
 
@@ -300,7 +281,7 @@ docs = \
 fileContent.append(docs)
 
 viIi = \
-"""Place here """+toolName+""" Design Files
+"""Place here """+cfg.toolName+""" Design Files
 After release, keep record about any required changes in TODO directory.
 """
 fileContent.append(viIi)
@@ -342,7 +323,7 @@ AND THEN READ TODO file at!
 fileContent.append(releaseWrn)
 
 info = \
-"""Use same naming for folders as in ! """+toolName+""" Source Files
+"""Use same naming for folders as in ! """+cfg.toolName+""" Source Files
 """
 fileContent.append(info)
 
@@ -418,8 +399,8 @@ fileContent.append(releasedSch)
 
 releasedSrc = \
 """Place here zip file of source files, e.g copy and pack here directory from:\n"""+\
-"."+slash+projectName+clientName+slash+"Design Files"+slash+clientName+slash+\
-projectName+slash+"VxIx"+slash+\
+"."+slash+cfg.projectName+cfg.clientName+slash+"Design Files"+slash+cfg.clientName+slash+\
+cfg.projectName+slash+"VxIx"+slash+\
 "\nwhere VxIx is the latest project version ready to release."
 fileContent.append(releasedSrc)
 ## RELEASE for VxIx
@@ -479,7 +460,7 @@ fileContent.append(software)
 ## MAIN
 ##
 
-dirTemplate = __ReadFile(dirTemplateFilename)
+dirTemplate = __ReadFile(cfg.dirTemplateFilename)
 structure   = ParseDirTemplate(dirTemplate)
 PersonalizeProject(structure)
 CreatePaths(structure)
@@ -6646,8 +6627,8 @@ IFIKL0lEIFs8RjA2RUJFQkU2ODJDN0E3MTVBNTA4ODBBMDcxOTg0MkY+PEYwNkVCRUJFNjgyQzdB
 NzE1QTUwODgwQTA3MTk4NDJGPl0KPj4Kc3RhcnR4cmVmCjM0ODE3OQolJUVPRgo=
 """
 
-os.chdir("."+slash+projectName)
-if dirTemplateFilename is "DirectoryTemplate.txt":
+os.chdir("."+slash+cfg.projectName)
+if cfg.dirTemplateFilename is "DirectoryTemplate.txt":
     if not os.path.exists("Directory_Template_Manual.pdf"):
         with open("Directory_Template_Manual.pdf", "wb") as text_file:
 	    text_file.write(pdfSource.decode('base64', 'strict'))
