@@ -8,7 +8,7 @@ Directory template generator dedicated to hardware design flow control.
 
 ## Usage: 
 
-1. Open script `config.py`
+1. Open `config.py`
 2. Read comments.
 3. Setup client/project/tool info.
 4. Run script python `HwDirectoryTreeGenerator.py`.
